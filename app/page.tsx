@@ -116,3 +116,19 @@ export default function Home() {
     </div>
   );
 }
+
+
+// handleSave関数の中身を書き換え
+const handleSave = () => {
+  const profileData = { name, hobby, food, dream };
+  const jsonStr = JSON.stringify(profileData);
+  
+  // データをBase64（安全な文字列形式）に変換
+  const encodedData = btoa(encodeURIComponent(jsonStr));
+  
+  // 自分のサイトのURL + データのパラメータ
+  const shareUrl = `${window.location.origin}/profile?d=${encodedData}`;
+  
+  setQrValue(shareUrl); // QRコードをURLにする
+  alert("QRコードが新しくなりました！");
+};
