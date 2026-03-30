@@ -1,17 +1,12 @@
 @import "tailwindcss";
 
+/* 1. 変数の定義（そのまま） */
 :root {
   --background: #ffffff;
   --foreground: #171717;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
+/* 2. ダークモードの設定（そのまま） */
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
@@ -19,8 +14,12 @@
   }
 }
 
+/* 3. bodyの設定を「ゆるく」する */
+/* ここを書き換えることで、page.tsx の "bg-pink-50" が勝つようになります */
 body {
-  background: var(--background);
+  /* 固定の background を消して、Tailwindのクラスを優先させます */
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  /* フォントはお好みですが、一旦標準に */
+  font-family: ui-sans-serif, system-ui, sans-serif;
 }
