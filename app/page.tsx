@@ -2,61 +2,41 @@
 import React, { useState } from 'react';
 
 export default function InputPage() {
-  // 1. 状態（State）は必ずコンポーネントの「中」で定義する
   const [name, setName] = useState("");
   const [hobby, setHobby] = useState("");
   const [food, setFood] = useState("");
   const [dream, setDream] = useState("");
 
-  // 2. 保存ボタンの処理もコンポーネントの「中」に書く
   const handleSave = () => {
-    // 全ての入力があるかチェック
     if (!name || !hobby || !food || !dream) {
-      alert("すべての項目を入力してください");
+      alert("すべての項目を入力してください！✨");
       return;
     }
-
     const profileData = { name, hobby, food, dream }; 
     const jsonStr = JSON.stringify(profileData);
-    
-    // 日本語を安全にBase64に変換する処理
     const base64Data = btoa(unescape(encodeURIComponent(jsonStr))); 
-    
-    // 生成されたデータを持ってプロフィールページへ移動
     window.location.href = `/profile?d=${base64Data}`;
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-lg space-y-6">
-        <h1 className="text-2xl font-bold text-center text-slate-800">プロフィール入力</h1>
-        
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-700">お名前</label>
-            <input className="w-full border p-2 rounded-md" value={name} onChange={(e) => setName(e.target.value)} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700">趣味</label>
-            <input className="w-full border p-2 rounded-md" value={hobby} onChange={(e) => setHobby(e.target.value)} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700">好きな食べ物</label>
-            <input className="w-full border p-2 rounded-md" value={food} onChange={(e) => setFood(e.target.value)} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700">将来の夢</label>
-            <textarea className="w-full border p-2 rounded-md" value={dream} onChange={(e) => setDream(e.target.value)} />
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 flex items-center justify-center p-6">
+      <div className="max-w-md w-full bg-white/80 backdrop-blur-sm p-10 rounded-3xl shadow-2xl border border-white/50">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-500">
+            Profile Maker
+          </h1>
+          <p className="text-slate-500 mt-2 text-sm font-medium">あなただけの紹介カードを作ろう</p>
         </div>
-
-        <button 
-          onClick={handleSave}
-          className="w-full bg-pink-500 text-white py-3 rounded-xl font-bold hover:bg-pink-600 transition-colors"
-        >
-          プロフィールを作成する
-        </button>
-      </div>
-    </div>
-  );
-}
+        
+        <div className="space-y-5">
+          {[
+            { label: "お名前", val: name, set: setName, ph: "例: ヤマダ タロウ", type: "input" },
+            { label: "趣味", val: hobby, set: setHobby, ph: "例: 写真、旅行", type: "input" },
+            { label: "好きな食べ物", val: food, set: setFood, ph: "例: お寿司", type: "input" },
+            { label: "将来の夢", val: dream, set: setDream, ph: "例: 世界一周したい！", type: "textarea" },
+          ].map((field, i) => (
+            <div key={i} className="space-y-1">
+              <label className="text-xs font-bold text-slate-400 ml-1 uppercase tracking-wider">{field.label}</label>
+              {field.type === "input" ? (
+                <input 
+                  className="w-full bg-white/50 border-2 border-slate-100 p-3 rounded-xl focus:border-purple-400 focus:ring-4 focus:ring-purple-100 outline-none

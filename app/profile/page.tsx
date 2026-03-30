@@ -6,86 +6,70 @@ function ProfileContent() {
   const searchParams = useSearchParams();
   const dataRaw = searchParams.get('d');
 
-  // データがない場合の表示
-  if (!dataRaw) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="text-center p-8 bg-white rounded-2xl shadow-md">
-          <p className="text-slate-500 text-lg">データが見つかりませんでした。</p>
-          <a href="/" className="mt-4 inline-block text-pink-500 hover:underline">入力画面へ戻る</a>
-        </div>
-      </div>
-    );
-  }
+  if (!dataRaw) return <div className="min-h-screen flex items-center justify-center bg-slate-100 text-slate-400">Data Missing...</div>;
 
   try {
-    // 1. Base64デコード 2. URIデコード 3. JSONパース
-    // 入力側と対になる復元処理
     const decodedData = JSON.parse(decodeURIComponent(escape(atob(dataRaw))));
 
     return (
-      <div className="min-h-screen bg-pink-50 p-6 flex items-center justify-center">
-        <div className="max-w-sm w-full bg-white rounded-3xl shadow-2xl border-4 border-pink-100 overflow-hidden">
-          {/* ヘッダー部分 */}
-          <div className="bg-pink-400 p-8 text-white text-center">
-            <div className="w-24 h-24 bg-white rounded-full mx-auto mb-4 flex items-center justify-center text-5xl">
-              👤
+      <div className="min-h-screen bg-[#f8fafc] p-4 flex items-center justify-center font-sans">
+        {/* メインカード */}
+        <div className="relative max-w-[360px] w-full bg-white rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] overflow-hidden border border-white">
+          
+          {/* 装飾用のアブストラクトな背景 */}
+          <div className="absolute top-0 left-0 w-full h-40 bg-gradient-to-tr from-rose-400 to-orange-300 -skew-y-6 origin-top-left scale-110"></div>
+
+          <div className="relative pt-12 pb-8 px-8 flex flex-col items-center">
+            {/* アイコン */}
+            <div className="w-28 h-28 bg-white rounded-full flex items-center justify-center text-5xl shadow-xl mb-4 border-4 border-white">
+              🎨
             </div>
-            <h1 className="text-3xl font-bold">{decodedData.name}</h1>
-            <p className="opacity-90 mt-2 font-medium">Миний Профайл (My Profile)</p>
+            
+            <h1 className="text-3xl font-black text-slate-800 tracking-tight mb-1">{decodedData.name}</h1>
+            <span className="px-4 py-1 bg-rose-100 text-rose-500 rounded-full text-xs font-bold uppercase tracking-tighter">
+              Official Profile
+            </span>
           </div>
 
-          {/* コンテンツ部分 */}
-          <div className="p-8 space-y-6">
-            <div className="border-l-4 border-pink-200 pl-4">
-              <p className="text-pink-500 font-bold text-xs uppercase tracking-widest mb-1">Хобби (趣味)</p>
-              <p className="text-xl text-slate-700 font-semibold">{decodedData.hobby}</p>
-            </div>
-
-            <div className="border-l-4 border-pink-200 pl-4">
-              <p className="text-pink-500 font-bold text-xs uppercase tracking-widest mb-1">Дуртай хоол (好きな食べ物)</p>
-              <p className="text-xl text-slate-700 font-semibold">{decodedData.food}</p>
-            </div>
-
-            <div className="bg-pink-50 p-4 rounded-2xl relative">
-              <p className="text-pink-500 font-bold text-xs uppercase tracking-widest mb-2">Ирээдүй (将来の夢)</p>
-              <p className="text-lg text-slate-600 italic leading-relaxed">
-                「{decodedData.dream}」
-              </p>
-            </div>
+          <div className="px-8 pb-10 space-y-8">
+            {/* 各セクション */}
+            {[
+              { label: "My Hobby", val: decodedData.hobby, icon: "⭐" },
+              { label: "Favorite Food", val: decodedData.food, icon: "😋" },
+              { label: "Future Dream", val: decodedData.dream, icon: "🚀", full: true }
+            ].map((item, idx) => (
+              <div key={idx} className={item.full ? "pt-2" : ""}>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-sm">{item.icon}</span>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{item.label}</p>
+                </div>
+                <p className={`text-slate-700 ${item.full ? 'text-lg italic font-medium leading-relaxed bg-slate-50 p-4 rounded-2xl border border-slate-100' : 'text-xl font-bold ml-6'}`}>
+                  {item.val}
+                </p>
+              </div>
+            ))}
           </div>
 
-          {/* フッター（戻るボタン） */}
-          <div className="p-4 text-center border-t border-pink-50">
-            <a href="/" className="text-pink-300 hover:text-pink-500 text-sm transition-colors">
-              新しいプロファイルを作る
-            </a>
+          {/* 下部のボタン */}
+          <div className="bg-slate-50 p-6 flex justify-center">
+            <button 
+              onClick={() => window.location.href = '/'}
+              className="px-8 py-3 bg-white border border-slate-200 text-slate-500 text-sm font-bold rounded-2xl hover:bg-slate-100 hover:text-slate-700 transition-all shadow-sm"
+            >
+              ← Back to Editor
+            </button>
           </div>
         </div>
       </div>
     );
   } catch (e) {
-    console.error("Decode error:", e);
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-red-50">
-        <div className="text-center p-8 bg-white rounded-2xl shadow-md border border-red-100">
-          <p className="text-red-500 font-bold">データの読み込みに失敗しました。</p>
-          <p className="text-sm text-slate-400 mt-2">URLが正しくない可能性があります。</p>
-          <a href="/" className="mt-4 inline-block text-slate-500 hover:underline text-sm">戻る</a>
-        </div>
-      </div>
-    );
+    return <div className="text-center p-20">Error decoding profile.</div>;
   }
 }
 
-// Next.jsの仕様上、useSearchParamsを使う場合はSuspenseで囲む必要があります
 export default function ProfilePage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-pink-50">
-        <div className="animate-spin h-10 w-10 border-4 border-pink-500 rounded-full border-t-transparent"></div>
-      </div>
-    }>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
       <ProfileContent />
     </Suspense>
   );
