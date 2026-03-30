@@ -62,8 +62,7 @@ export default function InputPage() {
               <span className="absolute left-4 top-5 text-lg opacity-40">🚀</span>
               <textarea 
                 className="w-full bg-white border-2 border-slate-100/50 pl-11 pr-4 py-4 rounded-2xl focus:border-purple-400 focus:ring-4 focus:ring-purple-100 outline-none transition-all duration-300 text-slate-700 font-medium shadow-sm h-32 resize-none"
-                placeholder="将来の夢" value={dream} onChange={(e) => field.set ? field.set(e.target.value) : setDream(e.target.value)}
-              />
+              onChange={(e) => setDream(e.target.value)}              />
             </div>
           </div>
         </div>
