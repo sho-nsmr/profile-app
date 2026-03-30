@@ -19,62 +19,61 @@ export default function InputPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 flex items-center justify-center p-6">
-      <div className="max-w-md w-full bg-white/80 backdrop-blur-sm p-10 rounded-3xl shadow-2xl border border-white/50">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-500 pb-2">
-            Profile Maker
-          </h1>
-          <p className="text-slate-500 mt-2 text-sm font-medium">あなただけの紹介カードを作ろう</p>
+    <div className="relative min-h-screen w-full flex items-center justify-center bg-[#f0f2f5] overflow-hidden p-4">
+      {/* 背景の装飾（ふわふわした丸） */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-gradient-to-br from-pink-200 to-purple-200 blur-3xl opacity-60 animate-pulse"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-gradient-to-tr from-blue-200 to-teal-200 blur-3xl opacity-60"></div>
+
+      {/* フォーム本体 */}
+      <div className="relative z-10 w-full max-w-[450px] bg-white/70 backdrop-blur-xl p-8 sm:p-12 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-white/50">
+        <div className="text-center mb-10">
+          <div className="inline-block p-3 bg-white rounded-2xl shadow-sm mb-4">
+            <span className="text-3xl">📝</span>
+          </div>
+          <h1 className="text-3xl font-black text-slate-800 tracking-tight">Create Profile</h1>
+          <p className="text-slate-500 mt-2 font-medium">情報を入力してカードを作ろう</p>
         </div>
         
-        <div className="space-y-5">
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-slate-400 ml-1 uppercase tracking-wider">お名前</label>
-            <input 
-              className="w-full bg-white/50 border-2 border-slate-100 p-3 rounded-xl focus:border-purple-400 focus:ring-4 focus:ring-purple-100 outline-none transition-all text-slate-700"
-              placeholder="例: ヤマダ タロウ" 
-              value={name} 
-              onChange={(e) => setName(e.target.value)}
-            />
-          </div>
+        <div className="space-y-6">
+          {[
+            { label: "Name", val: name, set: setName, ph: "お名前", icon: "👤" },
+            { label: "Hobby", val: hobby, set: setHobby, ph: "趣味", icon: "🎨" },
+            { label: "Favorite Food", val: food, set: setFood, ph: "好きな食べ物", icon: "🍕" },
+          ].map((item, i) => (
+            <div key={i} className="group">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-1 block">
+                {item.label}
+              </label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg opacity-40">{item.icon}</span>
+                <input 
+                  className="w-full bg-white border-2 border-slate-100/50 pl-11 pr-4 py-3.5 rounded-2xl focus:border-purple-400 focus:ring-4 focus:ring-purple-100 outline-none transition-all duration-300 text-slate-700 font-medium shadow-sm"
+                  placeholder={item.ph} value={item.val} onChange={(e) => item.set(e.target.value)}
+                />
+              </div>
+            </div>
+          ))}
 
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-slate-400 ml-1 uppercase tracking-wider">趣味</label>
-            <input 
-              className="w-full bg-white/50 border-2 border-slate-100 p-3 rounded-xl focus:border-purple-400 focus:ring-4 focus:ring-purple-100 outline-none transition-all text-slate-700"
-              placeholder="例: 写真、旅行" 
-              value={hobby} 
-              onChange={(e) => setHobby(e.target.value)}
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-slate-400 ml-1 uppercase tracking-wider">好きな食べ物</label>
-            <input 
-              className="w-full bg-white/50 border-2 border-slate-100 p-3 rounded-xl focus:border-purple-400 focus:ring-4 focus:ring-purple-100 outline-none transition-all text-slate-700"
-              placeholder="例: お寿司" 
-              value={food} 
-              onChange={(e) => setFood(e.target.value)}
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-slate-400 ml-1 uppercase tracking-wider">将来の夢</label>
-            <textarea 
-              className="w-full bg-white/50 border-2 border-slate-100 p-3 rounded-xl focus:border-purple-400 focus:ring-4 focus:ring-purple-100 outline-none transition-all text-slate-700 h-24 resize-none"
-              placeholder="例: 世界一周したい！" 
-              value={dream} 
-              onChange={(e) => setDream(e.target.value)}
-            />
+          <div className="group">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-1 block">
+              Future Dream
+            </label>
+            <div className="relative">
+              <span className="absolute left-4 top-5 text-lg opacity-40">🚀</span>
+              <textarea 
+                className="w-full bg-white border-2 border-slate-100/50 pl-11 pr-4 py-4 rounded-2xl focus:border-purple-400 focus:ring-4 focus:ring-purple-100 outline-none transition-all duration-300 text-slate-700 font-medium shadow-sm h-32 resize-none"
+                placeholder="将来の夢" value={dream} onChange={(e) => field.set ? field.set(e.target.value) : setDream(e.target.value)}
+              />
+            </div>
           </div>
         </div>
 
         <button 
           onClick={handleSave}
-          className="w-full mt-8 bg-gradient-to-r from-purple-600 to-pink-500 text-white py-4 rounded-2xl font-bold shadow-lg shadow-purple-200 hover:shadow-purple-300 hover:-translate-y-1 active:scale-95 transition-all duration-200"
+          className="w-full mt-10 bg-slate-900 text-white py-4 rounded-2xl font-bold shadow-xl hover:bg-purple-600 hover:shadow-purple-200 hover:-translate-y-1 active:scale-95 transition-all duration-300 group flex items-center justify-center gap-2"
         >
-          カードを生成する ✨
+          <span>カードを生成する</span>
+          <span className="group-hover:translate-x-1 transition-transform">✨</span>
         </button>
       </div>
     </div>
