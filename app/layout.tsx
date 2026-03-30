@@ -12,7 +12,7 @@ export default function RootLayout({
     return (
         <html lang="ja">
             <body>
-                {/* children ‚ÉŠeƒy[ƒW‚ÌƒRƒ“ƒeƒ“ƒc‚ª“ü‚è‚Ü‚· */}
+                {/* children ã«å„ãƒšãƒ¼ã‚¸ã®ã‚³ãƒ³ãƒ†ãƒ³ãƒ„ãŒå…¥ã‚Šã¾ã™ */}
                 {children}
             </body>
         </html>
