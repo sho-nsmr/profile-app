@@ -59,15 +59,19 @@ export default function Home() {
           <p className="text-sm mt-1">Найзууддаа өөрийгөө танилцуулаарай!</p>
         </div>
 
-        <form className="p-6 space-y-6">
+             <form className="p-6 space-y-6">
+          {/* 名前 (必須) */}
           <div>
-            <label className="block text-pink-600 font-bold mb-1 text-sm">Нэр (名前) <span className="text-red-500">*</span></label>
+            <label className="block text-pink-600 font-bold mb-1 text-sm">
+              Нэр (名前) <span className="text-red-500">*Шаардлагатай!</span>
+            </label>
             <input 
               type="text" 
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="w-full border-b-2 border-pink-200 focus:border-pink-500 outline-none p-2 bg-pink-50/50 rounded"
               placeholder="Нэрээ бичээрэй..."
+              required
             />
           </div>
 
