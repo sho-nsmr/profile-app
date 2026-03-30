@@ -1,80 +1,98 @@
 "use client";
+
 import React, { useState } from 'react';
 
-export default function InputPage() {
+export default function Home() {
+  // --- 1. 入力内容を記憶するための変数 (State) ---
   const [name, setName] = useState("");
   const [hobby, setHobby] = useState("");
   const [food, setFood] = useState("");
   const [dream, setDream] = useState("");
 
+  // --- 2. 保存ボタンを押した時の動き ---
   const handleSave = () => {
-    if (!name || !hobby || !food || !dream) {
-      alert("すべての項目を入力してください！✨");
-      return;
-    }
-    const profileData = { name, hobby, food, dream }; 
-    const jsonStr = JSON.stringify(profileData);
-    const base64Data = btoa(unescape(encodeURIComponent(jsonStr))); 
-    window.location.href = `/profile?d=${base64Data}`;
+    const profileData = { name, hobby, food, dream };
+    
+    // ブラウザのメモリに一時保存（リロードしても消えなくなります）
+    localStorage.setItem("my-profile", JSON.stringify(profileData));
+    
+    alert("Хадгалагдлаа! (保存されました！)\n次はこれをQRコードにする準備をしましょう。");
+    console.log("保存されたデータ:", profileData);
   };
 
   return (
-    <div className="relative min-h-screen w-full flex items-center justify-center bg-[#f0f2f5] overflow-hidden p-4">
-      {/* 背景の装飾（ふわふわした丸） */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-gradient-to-br from-pink-200 to-purple-200 blur-3xl opacity-60 animate-pulse"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-gradient-to-tr from-blue-200 to-teal-200 blur-3xl opacity-60"></div>
-
-      {/* フォーム本体 */}
-      <div className="relative z-10 w-full max-w-[450px] bg-white/70 backdrop-blur-xl p-8 sm:p-12 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-white/50">
-        <div className="text-center mb-10">
-          <div className="inline-block p-3 bg-white rounded-2xl shadow-sm mb-4">
-            <span className="text-3xl">📝</span>
-          </div>
-          <h1 className="text-3xl font-black text-slate-800 tracking-tight">Create Profile</h1>
-          <p className="text-slate-500 mt-2 font-medium">情報を入力してカードを作ろう</p>
-        </div>
-        
-        <div className="space-y-6">
-          {[
-            { label: "Name", val: name, set: setName, ph: "お名前", icon: "👤" },
-            { label: "Hobby", val: hobby, set: setHobby, ph: "趣味", icon: "🎨" },
-            { label: "Favorite Food", val: food, set: setFood, ph: "好きな食べ物", icon: "🍕" },
-          ].map((item, i) => (
-            <div key={i} className="group">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-1 block">
-                {item.label}
-              </label>
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg opacity-40">{item.icon}</span>
-                <input 
-                  className="w-full bg-white border-2 border-slate-100/50 pl-11 pr-4 py-3.5 rounded-2xl focus:border-purple-400 focus:ring-4 focus:ring-purple-100 outline-none transition-all duration-300 text-slate-700 font-medium shadow-sm"
-                  placeholder={item.ph} value={item.val} onChange={(e) => item.set(e.target.value)}
-                />
-              </div>
-            </div>
-          ))}
-
-          <div className="group">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-1 block">
-              Future Dream
-            </label>
-            <div className="relative">
-              <span className="absolute left-4 top-5 text-lg opacity-40">🚀</span>
-              <textarea 
-                className="w-full bg-white border-2 border-slate-100/50 pl-11 pr-4 py-4 rounded-2xl focus:border-purple-400 focus:ring-4 focus:ring-purple-100 outline-none transition-all duration-300 text-slate-700 font-medium shadow-sm h-32 resize-none"
-              onChange={(e) => setDream(e.target.value)}              />
-            </div>
-          </div>
+    <div className="min-h-screen bg-pink-50 p-4 font-sans text-slate-900 leading-relaxed">
+      <div className="max-w-md mx-auto bg-white rounded-3xl shadow-xl overflow-hidden border-4 border-pink-200 mt-4">
+        <div className="bg-pink-400 p-6 text-white text-center">
+          <h1 className="text-2xl font-bold tracking-wider">Миний プロファイル</h1>
+          <p className="text-sm mt-1">Найзууддаа өөрийгөө танилцуулаарай!</p>
         </div>
 
-        <button 
-          onClick={handleSave}
-          className="w-full mt-10 bg-slate-900 text-white py-4 rounded-2xl font-bold shadow-xl hover:bg-purple-600 hover:shadow-purple-200 hover:-translate-y-1 active:scale-95 transition-all duration-300 group flex items-center justify-center gap-2"
-        >
-          <span>カードを生成する</span>
-          <span className="group-hover:translate-x-1 transition-transform">✨</span>
-        </button>
+        <form className="p-6 space-y-6">
+          {/* 名前 */}
+          <div>
+            <label className="block text-pink-600 font-bold mb-1 text-sm">Нэр (名前)</label>
+            <input 
+              type="text" 
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full border-b-2 border-pink-200 focus:border-pink-500 outline-none p-2 bg-pink-50/50 rounded"
+              placeholder="Нэрээ бичээрэй..."
+            />
+          </div>
+
+          {/* 趣味 */}
+          <div>
+            <label className="block text-pink-600 font-bold mb-1 text-sm">Хобби (趣味)</label>
+            <input 
+              type="text" 
+              value={hobby}
+              onChange={(e) => setHobby(e.target.value)}
+              className="w-full border-b-2 border-pink-200 focus:border-pink-500 outline-none p-2 bg-pink-50/50 rounded"
+              placeholder="Дуртай зүйл..."
+            />
+          </div>
+
+          {/* 好きな食べ物 */}
+          <div>
+            <label className="block text-pink-600 font-bold mb-1 text-sm">Дуртай хоол (好きな食べ物)</label>
+            <select 
+              value={food}
+              onChange={(e) => setFood(e.target.value)}
+              className="w-full border-b-2 border-pink-200 focus:border-pink-500 outline-none p-2 bg-pink-50/50 rounded"
+            >
+              <option value="">Сонгох...</option>
+              <option value="buuz">Бууз (ブーズ)</option>
+              <option value="khuushuur">Хуушуур (ホーショール)</option>
+              <option value="tsuivan">Цуйван (ツイワン)</option>
+              <option value="horhog">Хорхог (ホルホグ)</option>
+            </select>
+          </div>
+
+          {/* 将来の夢 */}
+          <div>
+            <label className="block text-pink-600 font-bold mb-1 text-sm">Ирээдүйн хүсэл (将来の夢)</label>
+            <textarea 
+              value={dream}
+              onChange={(e) => setDream(e.target.value)}
+              className="w-full border-2 border-pink-100 focus:border-pink-400 outline-none p-3 bg-pink-50/50 rounded-xl h-28 resize-none"
+              placeholder="Би ирээдүйд..."
+            />
+          </div>
+
+          {/* 保存ボタン */}
+          <div className="pt-2">
+            <button 
+              type="button" 
+              onClick={handleSave}
+              className="w-full bg-gradient-to-r from-pink-400 to-pink-500 hover:from-pink-500 hover:to-pink-600 text-white font-bold py-4 rounded-full shadow-lg transition-all transform active:scale-95"
+            >
+              Хадгалах (保存する)
+            </button>
+          </div>
+        </form>
       </div>
+      <p className="text-center text-pink-300 text-xs mt-8">© 2026 Mazaalai Profile</p>
     </div>
   );
 }
