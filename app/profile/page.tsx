@@ -1,54 +1,44 @@
 "use client";
-import { useSearchParams } from 'next/navigation';
-import React, { Suspense } from 'react';
+import React, { useState } from 'react';
 
-function ProfileContent() {
-    const searchParams = useSearchParams();
-    const dataRaw = searchParams.get('d');
+export default function InputPage() {
+  // コンポーネントの中で状態を定義する
+  const [name, setName] = useState("");
+  const [hobby, setHobby] = useState("");
+  const [food, setFood] = useState("");
+  const [dream, setDream] = useState("");
 
-    if (!dataRaw) return <div className="p-10 text-center">Data not found.</div>;
-
-    try {
-        // データを復元
-        const decodedData = JSON.parse(decodeURIComponent(atob(dataRaw)));
-
-        return (
-            <div className="min-h-screen bg-pink-50 p-6 flex items-center justify-center">
-                <div className="max-w-sm w-full bg-white rounded-3xl shadow-2xl border-4 border-pink-200 overflow-hidden">
-                    <div className="bg-pink-400 p-8 text-white text-center">
-                        <div className="w-24 h-24 bg-white rounded-full mx-auto mb-4 flex items-center justify-center text-4xl">
-                            ??
-                        </div>
-                        <h1 className="text-3xl font-bold">{decodedData.name}</h1>
-                        <p className="opacity-90 mt-2">Миний Профайл</p>
-                    </div>
-
-                    <div className="p-8 space-y-6">
-                        <div>
-                            <p className="text-pink-500 font-bold text-sm uppercase tracking-widest">Хобби (趣味)</p>
-                            <p className="text-xl text-slate-700 border-b border-pink-100 pb-2">{decodedData.hobby}</p>
-                        </div>
-                        <div>
-                            <p className="text-pink-500 font-bold text-sm uppercase tracking-widest">Дуртай хоол (好きな食べ物)</p>
-                            <p className="text-xl text-slate-700 border-b border-pink-100 pb-2">{decodedData.food}</p>
-                        </div>
-                        <div>
-                            <p className="text-pink-500 font-bold text-sm uppercase tracking-widest">Ирээд?й (将来の夢)</p>
-                            <p className="text-lg text-slate-600 italic bg-pink-50/50 p-3 rounded-xl">{decodedData.dream}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    } catch (e) {
-        return <div className="p-10 text-center">Invalid data format.</div>;
+  const handleSave = () => {
+    // データのバリデーション（空入力チェック）
+    if (!name || !hobby || !food || !dream) {
+      alert("すべての項目を入力してください！");
+      return;
     }
-}
 
-export default function ProfilePage() {
-    return (
-        <Suspense fallback={<div>Loading...</div>}>
-            <ProfileContent />
-        </Suspense>
-    );
+    const profileData = { name, hobby, food, dream }; 
+    const jsonStr = JSON.stringify(profileData);
+    
+    // 日本語対応のBase64変換（btoaだけだと日本語でエラーになるため）
+    const base64Data = btoa(unescape(encodeURIComponent(jsonStr))); 
+    
+    // 生成されたURLへ移動
+    window.location.href = `/profile?d=${base64Data}`;
+  };
+
+  return (
+    <div className="p-10 space-y-4 max-w-md mx-auto">
+      <h1 className="text-2xl font-bold">プロフィール作成</h1>
+      <input className="w-full border p-2 rounded" placeholder="名前" value={name} onChange={(e) => setName(e.target.value)} />
+      <input className="w-full border p-2 rounded" placeholder="趣味" value={hobby} onChange={(e) => setHobby(e.target.value)} />
+      <input className="w-full border p-2 rounded" placeholder="好きな食べ物" value={food} onChange={(e) => setFood(e.target.value)} />
+      <input className="w-full border p-2 rounded" placeholder="将来の夢" value={dream} onChange={(e) => setDream(e.target.value)} />
+      
+      <button 
+        onClick={handleSave}
+        className="w-full bg-pink-500 text-white p-3 rounded-xl font-bold hover:bg-pink-600 transition"
+      >
+        プロフィールカードを作成する
+      </button>
+    </div>
+  );
 }
