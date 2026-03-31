@@ -144,4 +144,34 @@ export default function ViewPage() {
       </footer>
     </div>
   );
+
+{/* ...ProfileContent コンポーネント内の return 部分... */}
+
+<div className="space-y-3 pt-4">
+  <button 
+    onClick={saveToBinder}
+    className="w-full py-4 bg-orange-400 text-white font-bold rounded-2xl shadow-lg hover:bg-orange-500 transition-all flex items-center justify-center gap-2 active:scale-95"
+  >
+    <span>📖</span> Хадгалах (バインダーに保存する)
+  </button>
+
+  <Link 
+    href="/" 
+    className="flex items-center justify-center gap-2 w-full py-4 bg-slate-800 text-white font-bold rounded-2xl shadow-lg hover:bg-slate-900 transition-all active:scale-95"
+  >
+    <span>🏠</span> Буцах (戻る)
+  </Link>
+</div>
+
+{/* ...saveToBinder 関数内のアラートもモンゴル語化... */}
+const saveToBinder = () => {
+  // ... (既存の保存ロジック) ...
+  if (!isAlreadySaved) {
+    // ...
+    alert(`${profile.name}-ийн хуудсыг хадгаллаа! 📖✨ (保存しました！)`);
+  } else {
+    alert("Аль хэдийн хадгалсан байна. (既に保存されています)");
+  }
+};
+
 }

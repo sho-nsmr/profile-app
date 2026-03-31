@@ -120,6 +120,19 @@ export default function Home() {
         </div>
       </div>
       
+<div className="absolute top-4 right-4 z-20">
+  <Link href="/binder" className="flex flex-col items-center group">
+    <div className="bg-white p-3 rounded-2xl shadow-lg group-hover:bg-orange-50 transition-colors border-2 border-orange-200">
+      <span className="text-2xl">📖</span>
+    </div>
+    <span className="text-[10px] font-black text-orange-500 mt-1 text-center leading-tight">
+      Миний цуглуулга<br/>(バインダー)
+    </span>
+  </Link>
+</div>
+
+
+
       <p className="text-center text-sky-400/60 text-xs mt-12 relative z-10">© 2026 Mazaalai Profile</p>
     </div>
   );
