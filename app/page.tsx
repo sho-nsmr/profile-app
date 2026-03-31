@@ -29,7 +29,15 @@ export default function Home() {
   };
 
   return (
-    <div className="relative min-h-screen bg-sky-50 p-4 font-sans text-slate-900 overflow-x-hidden">
+    <div className="relative min-h-screen bg-sky-100 p-4 font-sans text-slate-900 overflow-hidden">
+      
+      {/* 雲のデコレーション（増量） */}
+      <div className="fixed top-10 left-[10%] text-6xl opacity-30 animate-pulse pointer-events-none">☁️</div>
+      <div className="fixed top-32 right-[15%] text-5xl opacity-20 animate-bounce pointer-events-none">☁️</div>
+      <div className="fixed bottom-40 left-[5%] text-7xl opacity-25 pointer-events-none">☁️</div>
+      <div className="fixed top-1/2 right-[5%] text-4xl opacity-20 animate-pulse pointer-events-none">☁️</div>
+      <div className="fixed bottom-10 right-[20%] text-6xl opacity-30 pointer-events-none">☁️</div>
+
       {isLoading && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-orange-500/80 backdrop-blur-sm">
           <div className="text-6xl animate-bounce">🔥</div>
@@ -39,8 +47,9 @@ export default function Home() {
         </div>
       )}
 
-      <div className={`max-w-md mx-auto transition-all duration-1000 ${qrUrl ? "animate-bounce mt-10" : "mt-4"}`}>
-        <div className="bg-white rounded-3xl shadow-xl overflow-hidden border-4 border-pink-200">
+      {/* メインコンテンツ: qrUrlがある時に上へスライド(フロート)させる */}
+      <div className={`max-w-md mx-auto transition-all duration-[3000ms] ease-in-out ${qrUrl ? "-translate-y-12 scale-105" : "translate-y-0"}`}>
+        <div className={`bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-pink-200 ${qrUrl ? "animate-pulse" : ""}`}>
           <div className="bg-pink-400 p-6 text-white text-center">
             <h1 className="text-2xl font-bold tracking-wider">Миний profile 🎈</h1>
             <p className="text-sm mt-1">Найзууддаа өөрийгөө танилцуулаарай!</p>
@@ -75,9 +84,11 @@ export default function Home() {
           </form>
 
           {qrUrl && !isLoading && (
-            <div className="p-6 bg-pink-50 border-t-4 border-dashed border-pink-200 text-center flex flex-col items-center">
-              <p className="text-pink-600 font-bold mb-4">🎈 Дээшээ хөөрлөө! (舞い上がれ！)</p>
-              <div className="bg-white p-4 rounded-2xl shadow-sm border-2 border-pink-100">
+            <div className="p-6 bg-sky-50 border-t-4 border-dashed border-sky-200 text-center flex flex-col items-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
+              <p className="text-sky-600 font-bold mb-4 flex items-center gap-2">
+                <span className="animate-bounce">🎈</span> Дээшээ хөөрлөө!
+              </p>
+              <div className="bg-white p-4 rounded-2xl shadow-md border-2 border-sky-100">
                 <QRCode value={qrUrl} size={150} />
               </div>
             </div>
@@ -85,9 +96,7 @@ export default function Home() {
         </div>
       </div>
       
-      <div className="fixed top-20 left-10 text-4xl opacity-20 animate-pulse pointer-events-none">☁️</div>
-      <div className="fixed top-40 right-10 text-5xl opacity-20 animate-bounce pointer-events-none">☁️</div>
-      <p className="text-center text-pink-300 text-xs mt-8">© 2026 Mazaalai Profile</p>
+      <p className="text-center text-sky-400/60 text-xs mt-8 relative z-10">© 2026 Mazaalai Profile</p>
     </div>
   );
 }
