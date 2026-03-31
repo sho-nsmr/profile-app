@@ -34,7 +34,6 @@ export default function Home() {
   return (
     <div className="relative min-h-screen bg-sky-50 p-4 font-sans text-slate-900 overflow-x-hidden">
       
-      {/* ローディング画面 */}
       {isLoading && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-orange-500/80 backdrop-blur-sm">
           <div className="text-6xl animate-bounce">🔥</div>
@@ -44,7 +43,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* メインカード */}
       <div className={`max-w-md mx-auto transition-all duration-1000 ${qrUrl ? "animate-bounce mt-10" : "mt-4"}`}>
         <div className="bg-white rounded-3xl shadow-xl overflow-hidden border-4 border-pink-200">
           <div className="bg-pink-400 p-6 text-white text-center">
@@ -94,3 +92,4 @@ export default function Home() {
           {qrUrl && !isLoading && (
             <div className="p-6 bg-pink-50 border-t-4 border-dashed border-pink-200 text-center flex flex-col items-center">
               <p className="text-pink-600 font-bold mb-4">🎈 Дээшээ хөөрлөө! (舞い上がれ！)</p>
+              <div className="bg-white p-4 rounded-2xl shadow-sm border-2 border-pink-1
