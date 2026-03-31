@@ -16,24 +16,20 @@ export default function Home() {
       alert("Нэрээ оруулна уу! (名前を入力してください！)");
       return;
     }
-
     setIsLoading(true);
     setQrUrl("");
-
     setTimeout(() => {
       const profileData = { name, hobby, food, dream };
       localStorage.setItem("my-profile", JSON.stringify(profileData));
       const encodedData = btoa(encodeURIComponent(JSON.stringify(profileData)));
       const demoUrl = `${window.location.origin}/view?data=${encodedData}`;
-      
       setQrUrl(demoUrl);
       setIsLoading(false);
-    }, 2000); 
+    }, 2000);
   };
 
   return (
     <div className="relative min-h-screen bg-sky-50 p-4 font-sans text-slate-900 overflow-x-hidden">
-      
       {isLoading && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-orange-500/80 backdrop-blur-sm">
           <div className="text-6xl animate-bounce">🔥</div>
@@ -55,12 +51,10 @@ export default function Home() {
               <label className="block text-pink-600 font-bold mb-1 text-sm">Нэр (名前) *</label>
               <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full border-b-2 border-pink-100 focus:border-pink-500 outline-none p-2 bg-pink-50/30 rounded" placeholder="Нэр..." required />
             </div>
-
             <div>
               <label className="block text-pink-600 font-bold mb-1 text-sm">Хобби (趣味)</label>
               <input type="text" value={hobby} onChange={(e) => setHobby(e.target.value)} className="w-full border-b-2 border-pink-100 focus:border-pink-500 outline-none p-2 bg-pink-50/30 rounded" placeholder="Дуртай зүйл..." />
             </div>
-
             <div>
               <label className="block text-pink-600 font-bold mb-1 text-sm">Дуртай хоол (好きな食べ物)</label>
               <select value={food} onChange={(e) => setFood(e.target.value)} className="w-full border-b-2 border-pink-100 focus:border-pink-500 outline-none p-2 bg-pink-50/30 rounded">
@@ -71,20 +65,11 @@ export default function Home() {
                 <option value="horhog">Хорхог (ホルホグ)</option>
               </select>
             </div>
-
             <div>
               <label className="block text-pink-600 font-bold mb-1 text-sm">Ирээдүйн хүсэл (将来の夢)</label>
               <textarea value={dream} onChange={(e) => setDream(e.target.value)} className="w-full border-2 border-pink-100 focus:border-pink-400 outline-none p-3 bg-pink-50/30 rounded-xl h-24 resize-none" />
             </div>
-
-            <button 
-              type="button" 
-              onClick={handleSave}
-              disabled={isLoading}
-              className={`w-full font-bold py-4 rounded-full shadow-lg transition-all transform active:scale-95 flex items-center justify-center gap-2 ${
-                isLoading ? "bg-gray-300 cursor-not-allowed" : "bg-gradient-to-r from-orange-400 to-red-500 text-white"
-              }`}
-            >
+            <button type="button" onClick={handleSave} disabled={isLoading} className={`w-full font-bold py-4 rounded-full shadow-lg transition-all transform active:scale-95 flex items-center justify-center gap-2 ${isLoading ? "bg-gray-300 cursor-not-allowed" : "bg-gradient-to-r from-orange-400 to-red-500 text-white"}`}>
               {isLoading ? "Уншиж байна..." : "Гал асаах (着火)"}
             </button>
           </form>
@@ -92,4 +77,17 @@ export default function Home() {
           {qrUrl && !isLoading && (
             <div className="p-6 bg-pink-50 border-t-4 border-dashed border-pink-200 text-center flex flex-col items-center">
               <p className="text-pink-600 font-bold mb-4">🎈 Дээшээ хөөрлөө! (舞い上がれ！)</p>
-              <div className="bg-white p-4 rounded-2xl shadow-sm border-2 border-pink-1
+              <div className="bg-white p-4 rounded-2xl shadow-sm border-2 border-pink-100">
+                <QRCode value={qrUrl} size={150} />
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+      
+      <div className="fixed top-20 left-10 text-4xl opacity-20 animate-pulse pointer-events-none">☁️</div>
+      <div className="fixed top-40 right-10 text-5xl opacity-20 animate-bounce pointer-events-none">☁️</div>
+      <p className="text-center text-pink-300 text-xs mt-8">© 2026 Mazaalai Profile</p>
+    </div>
+  );
+}
