@@ -5,7 +5,8 @@ import { useSearchParams } from 'next/navigation';
 function ProfileContent() {
   const searchParams = useSearchParams();
   const [profile, setProfile] = useState<any>(null);
-  const [error, setError] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [isLanded, setIsLanded] = useState(false);
 
   useEffect(() => {
     const data = searchParams.get('data');
@@ -13,46 +14,47 @@ function ProfileContent() {
       try {
         const decodedData = JSON.parse(decodeURIComponent(atob(data)));
         setProfile(decodedData);
+        // 2秒後に着陸完了フラグを立てる
+        setTimeout(() => setIsLanded(true), 2000);
       } catch (e) {
-        setError(true);
+        console.error(e);
       }
     }
   }, [searchParams]);
 
-  if (error) return <div className="p-10 text-center">Error</div>;
-  if (!profile) return <div className="p-10 text-center">Loading...</div>;
+  if (!profile) return <div className="p-10 text-center text-pink-400">Уншиж байна...</div>;
+
+  const getFoodName = (code: string) => {
+    const foods: any = {
+      buuz: "Бууз 🥟", khuushuur: "Хуушуур 🥟", tsuivan: "Цуйван 🍝", horhog: "Хорхог 🍖"
+    };
+    return foods[code] || "---";
+  };
 
   return (
-    <div className="max-w-md mx-auto bg-white rounded-3xl shadow-xl overflow-hidden border-4 border-pink-200 mt-10 animate-in slide-in-from-top-full duration-[2000ms]">
-      <div className="bg-pink-400 p-8 text-white text-center">
-        <div className="w-20 h-20 bg-white rounded-full mx-auto mb-4 flex items-center justify-center text-4xl">🎈</div>
-        <h1 className="text-xl font-bold">{profile.name}-ийн профайл</h1>
-      </div>
-      <div className="p-6 space-y-4 bg-white">
-        <div className="bg-pink-50 p-3 rounded-xl">
-          <p className="text-xs text-pink-400 font-bold">趣味</p>
-          <p>{profile.hobby || "---"}</p>
-        </div>
-        <div className="bg-pink-50 p-3 rounded-xl">
-          <p className="text-xs text-pink-400 font-bold">好きな食べ物</p>
-          <p>{profile.food || "---"}</p>
-        </div>
-        <div className="bg-pink-50 p-3 rounded-xl">
-          <p className="text-xs text-pink-400 font-bold">将来の夢</p>
-          <p className="italic">"{profile.dream || "---"}"</p>
-        </div>
-        <a href="/" className="block w-full text-center py-3 bg-pink-400 text-white font-bold rounded-full">戻る</a>
-      </div>
-    </div>
-  );
-}
+    <div className="flex flex-col items-center justify-center min-h-[80vh] relative">
+      
+      {/* 2. 着陸する影 (地面に映る影) */}
+      <div className={`w-32 h-6 bg-black/10 rounded-[100%] blur-xl transition-all duration-[2000ms] ease-out 
+        ${isLanded ? "scale-100 opacity-40" : "scale-50 opacity-10 translate-y-20"}`} 
+      />
 
-export default function ViewPage() {
-  return (
-    <div className="min-h-screen bg-sky-50 p-4">
-      <Suspense fallback={<div>Loading...</div>}>
-        <ProfileContent />
-      </Suspense>
-    </div>
-  );
-}
+      {/* 気球本体のコンテナ */}
+      <div className={`relative z-10 transition-all duration-[2000ms] ease-out 
+        ${isLanded ? "translate-y-0" : "-translate-y-[100vh]"}`}>
+        
+        {!isOpen ? (
+          /* 3. 開封前の「タップして」の表示 */
+          <button 
+            onClick={() => setIsOpen(true)}
+            className="group flex flex-col items-center animate-bounce cursor-pointer"
+          >
+            <div className="text-8xl mb-4 transform group-hover:scale-110 transition-transform">🎈</div>
+            <div className="bg-white px-6 py-2 rounded-full shadow-lg border-2 border-pink-400 text-pink-500 font-bold animate-pulse">
+              Товшиж нээгээрэй! (タップして開く)
+            </div>
+          </button>
+        ) : (
+          /* 3. 開封後のプロフィールカード */
+          <div className="max-w-md mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-pink-200 animate-in zoom-in duration-500">
+            <div className="bg-pink-400 p-6 text-white text-center
