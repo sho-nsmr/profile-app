@@ -35,8 +35,9 @@ export default function Home() {
       <div className="fixed top-10 left-[10%] text-6xl opacity-30 animate-pulse pointer-events-none">☁️</div>
       <div className="fixed top-32 right-[15%] text-5xl opacity-20 animate-bounce pointer-events-none">☁️</div>
       <div className="fixed bottom-40 left-[5%] text-7xl opacity-25 pointer-events-none">☁️</div>
-      <div className="fixed top-1/2 right-[5%] text-4xl opacity-20 animate-pulse pointer-events-none">☁️</div>
-      <div className="fixed bottom-10 right-[20%] text-6xl opacity-30 pointer-events-none">☁️</div>
+      <div className="fixed top-1/2 right-[10%] text-4xl opacity-20 animate-pulse pointer-events-none">☁️</div>
+      <div className="fixed bottom-20 right-[5%] text-6xl opacity-30 pointer-events-none animate-bounce duration-[5000ms]">☁️</div>
+      <div className="fixed top-1/4 left-[80%] text-5xl opacity-10 pointer-events-none">☁️</div>
 
       {isLoading && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-orange-500/80 backdrop-blur-sm">
@@ -47,10 +48,12 @@ export default function Home() {
         </div>
       )}
 
-      {/* メインコンテンツ: qrUrlがある時に上へスライド(フロート)させる */}
-      <div className={`max-w-md mx-auto transition-all duration-[3000ms] ease-in-out ${qrUrl ? "-translate-y-12 scale-105" : "translate-y-0"}`}>
-        <div className={`bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-pink-200 ${qrUrl ? "animate-pulse" : ""}`}>
-          <div className="bg-pink-400 p-6 text-white text-center">
+      {/* メインコンテンツ: 上下移動のフロート演出 */}
+      <div className={`max-w-md mx-auto transition-all duration-[3000ms] ease-in-out ${qrUrl ? "-translate-y-10 scale-105" : "translate-y-0"}`}>
+        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-pink-200">
+          
+          {/* ヘッダー部分: ここだけ pulse させて気球の揺らぎを表現 */}
+          <div className={`bg-pink-400 p-6 text-white text-center ${qrUrl ? "animate-pulse" : ""}`}>
             <h1 className="text-2xl font-bold tracking-wider">Миний profile 🎈</h1>
             <p className="text-sm mt-1">Найзууддаа өөрийгөө танилцуулаарай!</p>
           </div>
@@ -79,16 +82,17 @@ export default function Home() {
               <textarea value={dream} onChange={(e) => setDream(e.target.value)} className="w-full border-2 border-pink-100 focus:border-pink-400 outline-none p-3 bg-pink-50/30 rounded-xl h-24 resize-none" />
             </div>
             <button type="button" onClick={handleSave} disabled={isLoading} className={`w-full font-bold py-4 rounded-full shadow-lg transition-all transform active:scale-95 flex items-center justify-center gap-2 ${isLoading ? "bg-gray-300 cursor-not-allowed" : "bg-gradient-to-r from-orange-400 to-red-500 text-white"}`}>
-              {isLoading ? "Уншиж байна..." : "Гал асаах (着火)"}
+              {isLoading ? "Уншиж バйна..." : "Гал асаах (着火)"}
             </button>
           </form>
 
+          {/* QRコード表示部分: ここはアニメーションをさせず、くっきり表示 */}
           {qrUrl && !isLoading && (
-            <div className="p-6 bg-sky-50 border-t-4 border-dashed border-sky-200 text-center flex flex-col items-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
+            <div className="p-6 bg-sky-50 border-t-4 border-dashed border-sky-200 text-center flex flex-col items-center animate-in fade-in zoom-in duration-700">
               <p className="text-sky-600 font-bold mb-4 flex items-center gap-2">
                 <span className="animate-bounce">🎈</span> Дээшээ хөөрлөө!
               </p>
-              <div className="bg-white p-4 rounded-2xl shadow-md border-2 border-sky-100">
+              <div className="bg-white p-4 rounded-2xl shadow-md border-2 border-sky-100 ring-4 ring-white">
                 <QRCode value={qrUrl} size={150} />
               </div>
             </div>
