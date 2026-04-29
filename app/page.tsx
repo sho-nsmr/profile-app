@@ -12,6 +12,8 @@ export default function Home() {
   const [qrUrl, setQrUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [origin, setOrigin] = useState(""); // originを保存するステートを追加
+  const [step, setStep] = useState<"form" | "ignite" | "loading" | "done">("form");
+
 
   // マウント時に一度だけ実行してドメイン名を取得
   useEffect(() => {
@@ -26,17 +28,15 @@ export default function Home() {
       return;
     }
 
-    setIsLoading(true);
-    setQrUrl("");
+   setStep("loading");
 
-    // 2秒間の「着火」演出
+    // 1.8秒間の「着火」演出
     setTimeout(() => {
       const profileData = { name, hobby, food, dream };
       const encodedData = btoa(encodeURIComponent(JSON.stringify(profileData)));
       const demoUrl = `${origin}/view?data=${encodedData}`;      
       
       setQrUrl(demoUrl);
-      setIsLoading(false);
       setStep("done");
     }, 1800);
   };
@@ -69,7 +69,7 @@ export default function Home() {
       </div>
 
       {/* --- 強化された「着火」ローディング演出 --- */}
-      {step === "loading" && isLoading && (
+      {step === "loading" && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-orange-600/90 backdrop-blur-md text-white animate-in fade-in duration-300">
           {/* 背景の熱気を感じさせるパルスアニメーション */}
           <div className="absolute inset-0 bg-gradient-to-t from-red-600/30 to-transparent animate-pulse" />
@@ -134,7 +134,7 @@ export default function Home() {
         {step === "form" && (
             <button 
               type="button" 
-              onClick={() => setStep("ignite")}              disabled={isLoading} 
+              onClick={() => setStep("ignite")}          
               className={`w-full font-black py-4 rounded-full shadow-lg transition-all transform active:scale-95 flex flex-col items-center justify-center ${isLoading ? "bg-gray-300" : "bg-gradient-to-r from-orange-400 via-red-500 to-pink-500 text-white hover:brightness-105"}`}
             >
               <span className="text-lg">ГАЛ АСААХ (着火)</span>
@@ -197,6 +197,7 @@ export default function Home() {
 function SwipeIgnite({ onComplete }: { onComplete: () => void }) {
   const [startY, setStartY] = useState<number | null>(null);
   const [progress, setProgress] = useState(0);
+  const [triggered, setTriggered] = useState(false);
 
   return (
     <div
@@ -207,8 +208,9 @@ function SwipeIgnite({ onComplete }: { onComplete: () => void }) {
         const diff = startY - e.touches[0].clientY;
         const p = Math.min(Math.max(diff / 3, 0), 100);
         setProgress(p);
-        if (p > 80) {
-          onComplete();
+        if (p > 80 && !triggered) {
+        setTriggered(true);
+        onComplete();
         }
       }}
       onTouchEnd={() => {
