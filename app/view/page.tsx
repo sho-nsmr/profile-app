@@ -110,6 +110,11 @@ function ProfileContent() {
                 </div>
               </div>
 
+
+              <div className="mt-4 text-center text-[10px] text-pink-300 italic">
+                Энэ профайлыг {profile.name}  бичсэн!
+              </div>
+
               <div className="space-y-3 pt-4 border-t border-pink-100">
                 {/* バインダーから来た場合は保存ボタンを表示しない */}
                 {!isFromBinder && (

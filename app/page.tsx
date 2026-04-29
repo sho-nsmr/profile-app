@@ -153,57 +153,6 @@ export default function Home() {
         </div>
       </div>
 
-"use client";
-
-import { useSearchParams } from "next/navigation";
-
-export default function ViewPage() {
-  const searchParams = useSearchParams();
-  const data = searchParams.get("data");
-
-  if (!data) return <div>データがありません</div>;
-
-  // デコード（あなたの仕様に合わせる）
-  const profile = JSON.parse(
-    decodeURIComponent(atob(data))
-  );
-
-  const handleSave = () => {
-    const saved = JSON.parse(localStorage.getItem("cards") || "[]");
-
-    // 重複チェック（同じdataなら保存しない）
-    if (saved.find((c: any) => c.data === data)) {
-      alert("すでに保存されています！");
-      return;
-    }
-
-    saved.push({
-      id: Date.now(),
-      data,        // 元データそのまま保存
-      profile      // 表示用
-    });
-
-    localStorage.setItem("cards", JSON.stringify(saved));
-    alert("保存しました！🎉");
-  };
-
-  return (
-    <div className="p-6">
-      <h1 className="text-xl font-bold">{profile.name}</h1>
-      <p>趣味: {profile.hobby}</p>
-      <p>食べ物: {profile.food}</p>
-      <p>夢: {profile.dream}</p>
-
-      <button
-        onClick={handleSave}
-        className="mt-6 px-4 py-2 bg-pink-400 text-white rounded-full"
-      >
-        保存する 📖
-      </button>
-    </div>
-  );
-
-
 
 
       <p className="text-center text-sky-400/40 text-[9px] mt-12 relative z-10 tracking-[0.3em] font-bold uppercase">
