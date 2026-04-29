@@ -25,6 +25,7 @@ export default function Home() {
       alert("Нэрээ оруулна уу! (名前を入力してください！)");
       return;
     }
+
     setIsLoading(true);
     setQrUrl("");
 
@@ -33,9 +34,11 @@ export default function Home() {
       const profileData = { name, hobby, food, dream };
       const encodedData = btoa(encodeURIComponent(JSON.stringify(profileData)));
       const demoUrl = `${origin}/view?data=${encodedData}`;      
+      
       setQrUrl(demoUrl);
       setIsLoading(false);
-    }, 2000);
+      setStep("done");
+    }, 1800);
   };
 
   return (
@@ -66,7 +69,7 @@ export default function Home() {
       </div>
 
       {/* --- 強化された「着火」ローディング演出 --- */}
-      {isLoading && (
+      {step === "loading" && isLoading && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-orange-600/90 backdrop-blur-md text-white animate-in fade-in duration-300">
           {/* 背景の熱気を感じさせるパルスアニメーション */}
           <div className="absolute inset-0 bg-gradient-to-t from-red-600/30 to-transparent animate-pulse" />
@@ -127,19 +130,27 @@ export default function Home() {
               <textarea value={dream} onChange={(e) => setDream(e.target.value)} className="w-full border-2 border-pink-100 focus:border-pink-400 outline-none p-3 bg-pink-50/30 rounded-xl h-20 resize-none text-sm font-medium" placeholder="Мөрөөдөл..." />
             </div>
             
+
+        {step === "form" && (
             <button 
               type="button" 
-              onClick={handleSave} 
-              disabled={isLoading} 
+              onClick={() => setStep("ignite")}              disabled={isLoading} 
               className={`w-full font-black py-4 rounded-full shadow-lg transition-all transform active:scale-95 flex flex-col items-center justify-center ${isLoading ? "bg-gray-300" : "bg-gradient-to-r from-orange-400 via-red-500 to-pink-500 text-white hover:brightness-105"}`}
             >
               <span className="text-lg">ГАЛ АСААХ (着火)</span>
             </button>
-                
+        )}
+
+
                 {/* スワイプ点火レイヤー（追加） */}
-{!isLoading && qrUrl === "" && (
+{step === "ignite" && (
   <div className="mt-6">
-    <SwipeIgnite onComplete={handleSave} />
+    <SwipeIgnite
+      onComplete={() => {
+        setStep("loading");
+        handleSave();
+      }}
+    />
   </div>
 )}
 
@@ -147,7 +158,7 @@ export default function Home() {
           </form>
 
           {/* QRコードセクション */}
-          {qrUrl && !isLoading && (
+          {step === "done" && qrUrl && !isLoading && (
             <div className="p-8 bg-white border-t-4 border-dashed border-sky-100 text-center flex flex-col items-center animate-in zoom-in-95 duration-700">
               <div className="mb-6">
                 <p className="text-sky-500 font-black flex items-center justify-center gap-2 text-lg">
