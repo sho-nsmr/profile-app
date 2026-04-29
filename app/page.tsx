@@ -46,11 +46,16 @@ export default function Home() {
         </Link>
       </div>
 
-      {/* 背景レイヤー */}
+{/* 雲の背景レイヤー (修正済み) */}
       <div className={`fixed inset-0 pointer-events-none transition-transform duration-[3000ms] ease-out ${qrUrl ? "translate-y-20" : "translate-y-0"}`}>
-        <div className="absolute top-[15%] left-[10%] text-4xl opacity-10 animate-pulse">☁️</div>
-        <div className="absolute top-[45%] right-[15%] text-3xl opacity-10">☁️</div>
-        <div className={`absolute top-[10%] left-[45%] text-6xl transition-opacity duration-1000 ${qrUrl ? "opacity-40" : "opacity-0"}`}>🌈</div>
+        <div className="absolute top-[15%] left-[10%] text-4xl opacity-10">☁️</div>
+        <div className="absolute top-[45%] right-[15%] text-3xl opacity-10">☁️</div> 
+        <div className="absolute bottom-[20%] left-[25%] text-5xl opacity-10">☁️</div>
+        <div className="absolute top-[5%] right-[25%] text-6xl opacity-20">☁️</div>
+        <div className="absolute top-[60%] left-[5%] text-7xl opacity-20">☁️</div>
+        <div className="absolute top-[30%] left-[75%] text-6xl opacity-15">☁️</div>
+        <div className="absolute top-[75%] right-[5%] text-8xl opacity-30">☁️</div>
+        <div className="absolute -bottom-10 left-[15%] text-9xl opacity-25">☁️</div>
       </div>
 
       {/* --- 強化された「着火」ローディング演出 --- */}
@@ -147,6 +152,59 @@ export default function Home() {
           )}
         </div>
       </div>
+
+"use client";
+
+import { useSearchParams } from "next/navigation";
+
+export default function ViewPage() {
+  const searchParams = useSearchParams();
+  const data = searchParams.get("data");
+
+  if (!data) return <div>データがありません</div>;
+
+  // デコード（あなたの仕様に合わせる）
+  const profile = JSON.parse(
+    decodeURIComponent(atob(data))
+  );
+
+  const handleSave = () => {
+    const saved = JSON.parse(localStorage.getItem("cards") || "[]");
+
+    // 重複チェック（同じdataなら保存しない）
+    if (saved.find((c: any) => c.data === data)) {
+      alert("すでに保存されています！");
+      return;
+    }
+
+    saved.push({
+      id: Date.now(),
+      data,        // 元データそのまま保存
+      profile      // 表示用
+    });
+
+    localStorage.setItem("cards", JSON.stringify(saved));
+    alert("保存しました！🎉");
+  };
+
+  return (
+    <div className="p-6">
+      <h1 className="text-xl font-bold">{profile.name}</h1>
+      <p>趣味: {profile.hobby}</p>
+      <p>食べ物: {profile.food}</p>
+      <p>夢: {profile.dream}</p>
+
+      <button
+        onClick={handleSave}
+        className="mt-6 px-4 py-2 bg-pink-400 text-white rounded-full"
+      >
+        保存する 📖
+      </button>
+    </div>
+  );
+
+
+
 
       <p className="text-center text-sky-400/40 text-[9px] mt-12 relative z-10 tracking-[0.3em] font-bold uppercase">
         © 2026 Mazaalai Profile
