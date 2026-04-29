@@ -128,6 +128,56 @@ export default function Home() {
             >
               <span className="text-lg">ГАЛ АСААХ (着火)</span>
             </button>
+                
+                {/* スワイプ点火レイヤー（追加） */}
+{!isLoading && qrUrl === "" && (
+  <div className="mt-6">
+    <SwipeIgnite onComplete={handleSave} />
+  </div>
+)}
+function SwipeIgnite({ onComplete }: { onComplete: () => void }) {
+  const [startY, setStartY] = useState<number | null>(null);
+  const [progress, setProgress] = useState(0);
+
+  return (
+    <div
+      className="flex flex-col items-center justify-center select-none"
+      onTouchStart={(e) => setStartY(e.touches[0].clientY)}
+      onTouchMove={(e) => {
+        if (startY === null) return;
+
+        const diff = startY - e.touches[0].clientY;
+        const p = Math.min(Math.max(diff / 3, 0), 100);
+        setProgress(p);
+
+        if (p > 80) {
+          onComplete();
+        }
+      }}
+      onTouchEnd={() => {
+        setStartY(null);
+        setProgress(0);
+      }}
+    >
+      <div className="text-6xl transition-transform">
+        🎈
+      </div>
+
+      <p className="text-xs mt-2 text-pink-500 animate-pulse">
+        ↑ Swipe up to ignite
+      </p>
+
+      <div className="w-40 h-2 bg-pink-100 rounded-full mt-3 overflow-hidden">
+        <div
+          className="h-full bg-gradient-to-r from-orange-400 to-pink-500 transition-all"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
+
           </form>
 
           {/* QRコードセクション */}
