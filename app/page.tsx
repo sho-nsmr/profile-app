@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // useEffectを追加
 import QRCode from "react-qr-code";
-import Link from 'next/link'; 
+import Link from 'next/link';
 
 export default function Home() {
   const [name, setName] = useState("");
@@ -11,6 +11,14 @@ export default function Home() {
   const [dream, setDream] = useState("");
   const [qrUrl, setQrUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [origin, setOrigin] = useState(""); // originを保存するステートを追加
+
+  // マウント時に一度だけ実行してドメイン名を取得
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setOrigin(window.location.origin);
+    }
+  }, []);
 
   const handleSave = () => {
     if (!name.trim()) {
@@ -24,8 +32,7 @@ export default function Home() {
     setTimeout(() => {
       const profileData = { name, hobby, food, dream };
       const encodedData = btoa(encodeURIComponent(JSON.stringify(profileData)));
-      const demoUrl = `${window.location.origin}/view?data=${encodedData}`;
-      
+      const demoUrl = `${origin}/view?data=${encodedData}`;      
       setQrUrl(demoUrl);
       setIsLoading(false);
     }, 2000);
@@ -135,47 +142,6 @@ export default function Home() {
     <SwipeIgnite onComplete={handleSave} />
   </div>
 )}
-function SwipeIgnite({ onComplete }: { onComplete: () => void }) {
-  const [startY, setStartY] = useState<number | null>(null);
-  const [progress, setProgress] = useState(0);
-
-  return (
-    <div
-      className="flex flex-col items-center justify-center select-none"
-      onTouchStart={(e) => setStartY(e.touches[0].clientY)}
-      onTouchMove={(e) => {
-        if (startY === null) return;
-
-        const diff = startY - e.touches[0].clientY;
-        const p = Math.min(Math.max(diff / 3, 0), 100);
-        setProgress(p);
-
-        if (p > 80) {
-          onComplete();
-        }
-      }}
-      onTouchEnd={() => {
-        setStartY(null);
-        setProgress(0);
-      }}
-    >
-      <div className="text-6xl transition-transform">
-        🎈
-      </div>
-
-      <p className="text-xs mt-2 text-pink-500 animate-pulse">
-        ↑ Swipe up to ignite
-      </p>
-
-      <div className="w-40 h-2 bg-pink-100 rounded-full mt-3 overflow-hidden">
-        <div
-          className="h-full bg-gradient-to-r from-orange-400 to-pink-500 transition-all"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
-    </div>
-  );
-}
 
 
           </form>
@@ -208,6 +174,47 @@ function SwipeIgnite({ onComplete }: { onComplete: () => void }) {
       <p className="text-center text-sky-400/40 text-[9px] mt-12 relative z-10 tracking-[0.3em] font-bold uppercase">
         © 2026 Mazaalai Profile
       </p>
+    </div>
+  );
+}
+
+
+
+
+
+// スワイプ演出を外に置くこと
+function SwipeIgnite({ onComplete }: { onComplete: () => void }) {
+  const [startY, setStartY] = useState<number | null>(null);
+  const [progress, setProgress] = useState(0);
+
+  return (
+    <div
+      className="flex flex-col items-center justify-center select-none"
+      onTouchStart={(e) => setStartY(e.touches[0].clientY)}
+      onTouchMove={(e) => {
+        if (startY === null) return;
+        const diff = startY - e.touches[0].clientY;
+        const p = Math.min(Math.max(diff / 3, 0), 100);
+        setProgress(p);
+        if (p > 80) {
+          onComplete();
+        }
+      }}
+      onTouchEnd={() => {
+        setStartY(null);
+        setProgress(0);
+      }}
+    >
+      <div className="text-6xl">🎈</div>
+      <p className="text-xs mt-2 text-pink-500 animate-pulse">
+        ↑ Swipe up to ignite
+      </p>
+      <div className="w-40 h-2 bg-pink-100 rounded-full mt-3 overflow-hidden">
+        <div
+          className="h-full bg-gradient-to-r from-orange-400 to-pink-500 transition-all"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
     </div>
   );
 }
