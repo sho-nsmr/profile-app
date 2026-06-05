@@ -64,7 +64,7 @@ export default function BinderPage() {
 
 
   return (
-    <div className="min-h-screen bg-orange-50 p-6 font-sans flex flex-col items-center">
+    <div className="min-h-screen bg-orange-50 p-6 flex flex-col items-center">
       
       {/* ヘッダー */}
       <header className="w-full max-w-md flex justify-between items-center mb-6">

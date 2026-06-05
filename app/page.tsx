@@ -46,7 +46,7 @@ export default function Home() {
   };
 
   return (
-    <div className="relative min-h-screen bg-sky-100 p-4 font-sans text-slate-900 overflow-hidden">
+    <div className="relative min-h-screen bg-sky-100 p-4 text-slate-900 overflow-hidden">
       
       {/* バインダーへのリンク (アイコンのみのシンプル設計) */}
       <div className="absolute top-4 right-4 z-30">
