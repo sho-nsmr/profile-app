@@ -142,20 +142,18 @@ export default function Home() {
         )}
 
 
-                {/* スワイプ点火レイヤー（追加） */}
-{step === "ignite" && (
-  <div className="mt-6">
-    <SwipeIgnite
-      onComplete={() => {
-        setStep("loading");
-        handleSave();
-      }}
-    />
-  </div>
-)}
-
-
+        {step === "ignite" && (
+              <div className="mt-6">
+                <SwipeIgnite
+                  onComplete={() => {
+                    handleSave();
+                  }}
+                />
+              </div>
+            )}
           </form>
+
+  
 
           {/* QRコードセクション */}
           {step === "done" && qrUrl && !isLoading && (
@@ -201,30 +199,49 @@ function SwipeIgnite({ onComplete }: { onComplete: () => void }) {
 
   return (
     <div
-      className="flex flex-col items-center justify-center select-none"
-      onTouchStart={(e) => setStartY(e.touches[0].clientY)}
+      className="flex flex-col items-center justify-center select-none touch-none p-4 border-2 border-dashed border-pink-200 rounded-2xl bg-pink-50/20"
+      onTouchStart={(e) => {
+        setStartY(e.touches[0].clientY);
+      }}
       onTouchMove={(e) => {
-        if (startY === null) return;
-        const diff = startY - e.touches[0].clientY;
-        const p = Math.min(Math.max(diff / 3, 0), 100);
+        if (startY === null || triggered) return;
+        
+        // 通常のスクロールを防止してスワイプ操作に集中させる
+        if (e.cancelable) e.preventDefault();
+
+        const currentY = e.touches[0].clientY;
+        const diff = startY - currentY; // 上方向のスワイプ
+        
+        // 感度調整（120px引っ張ったらMAXになるように調整）
+        const p = Math.min(Math.max((diff / 120) * 100, 0), 100);
         setProgress(p);
-        if (p > 80 && !triggered) {
-        setTriggered(true);
-        onComplete();
+
+        if (p >= 100 && !triggered) {
+          setTriggered(true);
+          onComplete();
         }
       }}
       onTouchEnd={() => {
         setStartY(null);
-        setProgress(0);
+        // トリガーされていない場合のみリセット
+        if (!triggered) {
+          setProgress(0);
+        }
       }}
     >
-      <div className="text-6xl">🎈</div>
-      <p className="text-xs mt-2 text-pink-500 animate-pulse">
-        ↑ Swipe up to ignite
+      {/* 進行度に合わせてバルーンを上に移動させる演出を追加 */}
+      <div 
+        className="text-6xl transition-transform duration-75 ease-out"
+        style={{ transform: `translateY(-${progress * 0.4}px)` }}
+      >
+        🎈
+      </div>
+      <p className="text-xs mt-2 text-pink-500 font-bold animate-pulse">
+        {triggered ? "🚀 IGNITED!" : "↑ Swipe up to ignite"}
       </p>
       <div className="w-40 h-2 bg-pink-100 rounded-full mt-3 overflow-hidden">
         <div
-          className="h-full bg-gradient-to-r from-orange-400 to-pink-500 transition-all"
+          className="h-full bg-gradient-to-r from-orange-400 to-pink-500 transition-all duration-75"
           style={{ width: `${progress}%` }}
         />
       </div>
