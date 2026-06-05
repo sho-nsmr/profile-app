@@ -35,6 +35,7 @@ export default function Home() {
 
     // 1.8秒間の「着火」演出
     setTimeout(() => {
+      const profileData = { name, hobby, food, dream };
       const jsonStr = JSON.stringify(profileData);
       const compressedData = LZString.compressToEncodedURIComponent(jsonStr);      
       const demoUrl = `${origin}/view?p=${compressedData}`;      
@@ -158,7 +159,7 @@ export default function Home() {
     />
   </div>
 )}
- 
+</div>
 
           {/* QRコードセクション */}
           {step === "done" && qrUrl &&  (
