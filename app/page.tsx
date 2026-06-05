@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react'; // useEffectを追加
 import QRCode from "react-qr-code";
 import Link from 'next/link';
+import LZString from 'lz-string';
+
 
 export default function Home() {
   const [name, setName] = useState("");
@@ -10,7 +12,6 @@ export default function Home() {
   const [food, setFood] = useState("");
   const [dream, setDream] = useState("");
   const [qrUrl, setQrUrl] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [origin, setOrigin] = useState(""); // originを保存するステートを追加
   const [step, setStep] = useState<"form" | "ignite" | "loading" | "done">("form");
 
@@ -22,15 +23,21 @@ export default function Home() {
     }
   }, []);
 
+
+  const safeBtoa = (str: string) => {
+    return btoa(unescape(encodeURIComponent(str)));
+  };
+
+
   const handleSave = () => {
   //即座ロード
    setStep("loading");
 
     // 1.8秒間の「着火」演出
     setTimeout(() => {
-      const profileData = { name, hobby, food, dream };
-      const encodedData = btoa(encodeURIComponent(JSON.stringify(profileData)));
-      const demoUrl = `${origin}/view?data=${encodedData}`;      
+      const jsonStr = JSON.stringify(profileData);
+      const compressedData = LZString.compressToEncodedURIComponent(jsonStr);      
+      const demoUrl = `${origin}/view?p=${compressedData}`;      
       
       setQrUrl(demoUrl);
       setStep("done");
@@ -102,7 +109,7 @@ export default function Home() {
             <p className="text-xs mt-1 font-medium italic opacity-90">Найзууддаа өөрийгөө танилцуулаарай!</p>
           </div>
 
-          <form className="p-6 space-y-4">
+          <div className="p-6 space-y-4">
             <div>
               <label className="block text-pink-600 font-black mb-1 text-[10px] uppercase tracking-wider">Нэр (名前) *</label>
               <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full border-b-2 border-pink-100 focus:border-pink-500 focus:bg-pink-50/50 outline-none p-2 transition-all rounded font-bold" placeholder="Нэрээ бичнэ үү..." />
@@ -151,24 +158,10 @@ export default function Home() {
     />
   </div>
 )}
-
-
-
-        {step === "ignite" && (
-              <div className="mt-6">
-                <SwipeIgnite
-                  onComplete={() => {
-                    handleSave();
-                  }}
-                />
-              </div>
-            )}
-          </form>
-
-  
+ 
 
           {/* QRコードセクション */}
-          {step === "done" && qrUrl && !isLoading && (
+          {step === "done" && qrUrl &&  (
             <div className="p-8 bg-white border-t-4 border-dashed border-sky-100 text-center flex flex-col items-center animate-in zoom-in-95 duration-700">
               <div className="mb-6">
                 <p className="text-sky-500 font-black flex items-center justify-center gap-2 text-lg">

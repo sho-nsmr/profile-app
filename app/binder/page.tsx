@@ -2,6 +2,17 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import LZString from "lz-string"; // 1. lz-string をインポート
+
+// 料理の英語名を表示用に変換するマップ（辞書）
+const FOOD_MAP: Record<string, string> = {
+  buuz: "Бууз (ブーズ)",
+  khuushuur: "Хуушуур (ホーショール)",
+  tsuivan: "Цуйван (ツイワン)",
+  horhog: "Хорхог (ホルホグ)"
+};
+
+
 
 export default function BinderPage() {
   const [friends, setFriends] = useState<any[]>([]);
@@ -37,6 +48,20 @@ export default function BinderPage() {
   };
 
   const friend = friends[page];
+
+
+  //  英語の料理名をディスプレイ用に変換
+  const displayFood = friend ? (FOOD_MAP[friend.food] || friend.food || "...") : "...";
+
+  // 「くわしく見る」用の圧縮URLを生成
+  const getDetailUrl = () => {
+    if (!friend) return "#";
+    const jsonStr = JSON.stringify(friend);
+    const compressed = LZString.compressToEncodedURIComponent(jsonStr);
+    return `/view?p=${compressed}&from=binder`; // パラメータを「p」に変更
+  };
+
+
 
   return (
     <div className="min-h-screen bg-orange-50 p-6 font-sans flex flex-col items-center">
@@ -79,7 +104,7 @@ export default function BinderPage() {
               </h2>
 
               <p className="text-sm mb-1">🎨 Хобби: {friend.hobby || "..."}</p>
-              <p className="text-sm mb-1">🍴 Хоол: {friend.food || "..."}</p>
+              <p className="text-sm mb-1">🍴 Хоол: {displayFood}</p>
               <p className="text-sm italic text-slate-500 mt-3">
                 ✨ {friend.dream || "..."}
               </p>
@@ -119,12 +144,10 @@ export default function BinderPage() {
 
           {/* 詳細リンク */}
           <Link
-            href={`/view?data=${btoa(
-              encodeURIComponent(JSON.stringify(friend))
-            )}&from=binder`}
+           href={getDetailUrl()}
             className="mt-6 text-sm text-pink-400 underline"
           >
-            くわしく見る →
+            Хөхүүлэн үзэх (くわしく見る) →
           </Link>
         </div>
       )}

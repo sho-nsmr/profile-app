@@ -1,21 +1,30 @@
+import { Zen_Maru_Gothic } from "next/font/google"; // ① Google Fonts からインポート
 import "./globals.css";
 
+// ② フォントの設定
+const maruGothic = Zen_Maru_Gothic({
+  weight: ["400", "500", "750", "900"], // 必要な太さを指定（数字が大きいほど太くなります）
+  subsets: ["latin", "cyrillic-ext"],   // ★超重要：これでモンゴル語（キリル文字）も綺麗になります
+  preload: false,                       // 日本語フォントは容量が大きいためpreloadをオフにすると安定します
+});
+
 export const metadata = {
-    title: 'My App',
-    description: 'Next.js App',
+  title: 'Mazaalai Profile', // タイトルもアプリ名に合わせておきました！
+  description: 'Share your profile with friends!',
 }
 
 export default function RootLayout({
-    children,
+  children,
 }: {
-    children: React.ReactNode
+  children: React.ReactNode
 }) {
-    return (
-        <html lang="ja">
-            {/* 2. body の class を空にするか、削除して Tailwind を優先させます */}
-            <body className="antialiased">
-                {children}
-            </body>
-        </html>
-    )
+  return (
+    // ③ langを「mn（モンゴル語）」か「ja（日本語）」にする（今回はmn推奨、または消してもOK）
+    <html lang="mn">
+      {/* ④ bodyのclassNameに maruGothic.className を追加 */}
+      <body className={`${maruGothic.className} antialiased`}>
+        {children}
+      </body>
+    </html>
+  );
 }

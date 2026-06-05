@@ -3,11 +3,21 @@
 import React, { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import LZString from 'lz-string';
+
+const FOOD_MAP: Record<string, string> = {
+  buuz: "Бууз (ブーズ)",
+  khuushuur: "Хуушуур (ホーショール)",
+  tsuivan: "Цуйван (ツイワン)",
+  horhog: "Хорхог (ホルホグ)"
+};
+
 
 function ProfileContent() {
   const searchParams = useSearchParams();
   const [profile, setProfile] = useState<any>(null);
-  
+  const [error, setError] = useState(false); // エラーハンドリング用ステート
+
   // バインダーからのアクセスかどうかを判定
   const isFromBinder = searchParams.get('from') === 'binder';
   
@@ -16,21 +26,32 @@ function ProfileContent() {
   const [isLanded, setIsLanded] = useState(isFromBinder);
 
   useEffect(() => {
-    const data = searchParams.get('data');
-    if (data) {
+                    // パラメータ名を「data」から「p」に変更
+    const compressedData = searchParams.get('p');
+    if (compressedData) {
       try {
-        const decodedData = JSON.parse(decodeURIComponent(atob(data)));
-        setProfile(decodedData);
+                    //  lz-string で安全に解凍
+        const jsonStr = LZString.decompressFromEncodedURIComponent(compressedData);
         
-        // 通常のQR閲覧時のみ、空から降ってくる演出を行う
-        if (!isFromBinder) {
-          setTimeout(() => setIsLanded(true), 800);
+        if (jsonStr) {
+          const decodedData = JSON.parse(jsonStr);
+          setProfile(decodedData);
+          
+          if (!isFromBinder) {
+            setTimeout(() => setIsLanded(true), 800);
+          }
+        } else {
+          setError(true);
         }
       } catch (e) {
         console.error("Data decode error:", e);
+        setError(true);
       }
+    } else {
+      setError(true);
     }
   }, [searchParams, isFromBinder]);
+
 
   const saveToBinder = () => {
     if (!profile) return;
@@ -47,12 +68,23 @@ function ProfileContent() {
     }
   };
 
+    if (error) return (
+      <div className="flex flex-col items-center justify-center h-64 text-center">
+        <p className="text-red-400 font-bold">Өгөгдөл буруу байна 😢</p>
+        <p className="text-xs text-slate-400 mt-2">データが読み込めませんでした</p>
+        <Link href="/" className="mt-4 text-sm text-sky-500 underline">トップに戻る</Link>
+      </div>
+    );
+
   if (!profile) return (
     <div className="flex flex-col items-center justify-center h-64">
       <div className="animate-spin text-4xl">🎈</div>
       <p className="mt-4 text-pink-400 font-medium italic">Finding profile...</p>
     </div>
   );
+
+const displayFood = FOOD_MAP[profile.food] || profile.food || "Бүгд (全部)";
+
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[75vh] relative w-full max-w-sm mx-auto">
@@ -64,7 +96,7 @@ function ProfileContent() {
       <div className={`relative z-10 transition-all duration-[1500ms] cubic-bezier(0.17, 0.67, 0.83, 0.67) ${isLanded ? "translate-y-0" : "-translate-y-[120vh]"}`}>
         
         {!isOpen ? (
-          /* 初回閲覧：未開封状態（バッジ「1」と「おめでとう」を削除） */
+          /* 初回閲覧：未開封状態を削除） */
           <button 
             onClick={() => setIsOpen(true)} 
             className="group flex flex-col items-center cursor-pointer hover:scale-105 transition-transform active:scale-90"
@@ -99,7 +131,7 @@ function ProfileContent() {
               <div className="group">
                 <label className="flex items-center gap-2 text-[10px] text-pink-400 font-black uppercase tracking-widest mb-1 ml-1"><span>😋</span> Дуртай хоол</label>
                 <div className="bg-white p-4 rounded-2xl border-2 border-pink-50 shadow-sm text-pink-600 font-bold tracking-tight">
-                  {profile.food || "Бүгд (全部)"}
+                  {displayFood}
                 </div>
               </div>
 
