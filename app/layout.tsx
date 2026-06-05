@@ -3,7 +3,7 @@ import "./globals.css";
 
 // ② フォントの設定
 const maruGothic = Zen_Maru_Gothic({
-  weight: ["400", "500", "750", "900"], // 必要な太さを指定（数字が大きいほど太くなります）
+  weight: ["400", "500", "700", "900"], // 必要な太さを指定（数字が大きいほど太くなります）
   subsets: ["latin", "cyrillic-ext"],   // ★超重要：これでモンゴル語（キリル文字）も綺麗になります
   preload: false,                       // 日本語フォントは容量が大きいためpreloadをオフにすると安定します
 });

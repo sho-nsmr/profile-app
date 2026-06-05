@@ -161,6 +161,7 @@ export default function Home() {
 )}
 </div>
 
+
           {/* QRコードセクション */}
           {step === "done" && qrUrl &&  (
             <div className="p-8 bg-white border-t-4 border-dashed border-sky-100 text-center flex flex-col items-center animate-in zoom-in-95 duration-700">
