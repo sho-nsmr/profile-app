@@ -1,25 +1,9 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-/* bodyの設定：ここでNoto Sansの「丁寧な文字間と行間」を丸ゴシックに注入します */
 body {
-  background-color: var(--background);
-  color: var(--foreground);
+  /* ★最優先はPangolin（モンゴル語・英語用）、データがない日本語は `--font-kiwi`（キウイ丸）で綺麗に手書き風に穴埋め！ */
+  font-family: var(--font-pangolin), var(--font-font-kiwi), sans-serif;
   
-  /* ★ 1文字ずつの間隔をほんの少し広げてあげる（脱・Vibe Codingの極意） */
-  letter-spacing: 0.04em; 
-  
-  /* ★ 行の間隔をゆったり広げて、スマホでも圧倒的に読みやすくする */
+  letter-spacing: 0.05em; 
   line-height: 1.7;       
 }

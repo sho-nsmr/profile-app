@@ -1,10 +1,19 @@
-import { Zen_Maru_Gothic } from "next/font/google";
+import { Pangolin, Kiwi_Maru } from "next/font/google"; // ★ Kiwi_Maru を追加！
 import "./globals.css";
 
-const maruGothic = Zen_Maru_Gothic({
-  weight: ["400", "500", "700", "900"], 
-  subsets: ["latin", "cyrillic"], // モンゴル語もこれでバッチリ！
-  preload: false,                       
+// 1. モンゴル語・英語用（手書き）
+const pangolin = Pangolin({
+  weight: ["400"],
+  subsets: ["latin", "cyrillic"],
+  variable: "--font-pangolin", // CSS変数にする
+});
+
+// 2. 日本語用（手書き風丸文字）
+const kiwiMaru = Kiwi_Maru({
+  weight: ["400"],
+  subsets: ["latin"],
+  variable: "--font-kiwi", // CSS変数にする
+  preload: false,
 });
 
 export const metadata = {
@@ -19,8 +28,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="mn">
-      {/* ここで丸ゴシックを全体に適用 */}
-      <body className={`${maruGothic.className} antialiased`}>
+      {/* bodyに両方のフォント変数を仕込む */}
+      <body className={`${pangolin.variable} ${kiwiMaru.variable} antialiased`}>
         {children}
       </body>
     </html>
