@@ -1,8 +1,23 @@
 @import "tailwindcss";
 
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
 body {
-  /* ★最優先はPangolin（モンゴル語・英語用）、データがない日本語は `--font-kiwi`（キウイ丸）で綺麗に手書き風に穴埋め！ */
-  font-family: var(--font-pangolin), var(--font-font-kiwi), sans-serif;
+  background-color: var(--background);
+  color: var(--foreground);
+  
+  /* ★ font-font-kiwi になっていた部分を、正しい変数名（--font-kiwi）に修正！ */
+  font-family: var(--font-pangolin), var(--font-kiwi), sans-serif;
   
   letter-spacing: 0.05em; 
   line-height: 1.7;       
