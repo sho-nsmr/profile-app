@@ -23,11 +23,7 @@ export default function Home() {
   }, []);
 
   const handleSave = () => {
-    if (!name.trim()) {
-      alert("Нэрээ оруулна уу! (名前を入力してください！)");
-      return;
-    }
-
+  //即座ロード
    setStep("loading");
 
     // 1.8秒間の「着火」演出
@@ -131,15 +127,31 @@ export default function Home() {
             </div>
             
 
-        {step === "form" && (
+          {step === "form" && (
             <button 
               type="button" 
-              onClick={() => setStep("ignite")}          
-              className={`w-full font-black py-4 rounded-full shadow-lg transition-all transform active:scale-95 flex flex-col items-center justify-center ${isLoading ? "bg-gray-300" : "bg-gradient-to-r from-orange-400 via-red-500 to-pink-500 text-white hover:brightness-105"}`}
-            >
-              <span className="text-lg">ГАЛ АСААХ (着火)</span>
-            </button>
-        )}
+              onClick={() => setStep("ignite")} // 名前が入っている時しか押せないので、直接遷移してOK
+              disabled={!name.trim()} // ★名前が空の時はボタンを無効化
+              className={`w-full font-black py-4 rounded-full shadow-lg transition-all transform flex flex-col items-center justify-center
+                ${!name.trim() 
+                  ? "bg-slate-200 text-slate-400 cursor-not-allowed scale-100 shadow-none border-2 border-slate-300" // ★無効時の見た目
+                  : "bg-gradient-to-r from-orange-400 via-red-500 to-pink-500 text-white hover:brightness-105 active:scale-95 shadow-xl" // ★有効時の見た目
+                }`}
+  >
+    <span className="text-lg">ГАЛ АСААХ (着火)</span>
+  </button>
+)}
+
+{step === "ignite" && (
+  <div className="mt-6">
+    <SwipeIgnite
+      onComplete={() => {
+        handleSave(); // スワイプが完了したらローディング＆保存へ
+      }}
+    />
+  </div>
+)}
+
 
 
         {step === "ignite" && (
