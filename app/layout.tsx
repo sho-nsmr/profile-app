@@ -1,17 +1,24 @@
-import { Zen_Maru_Gothic } from "next/font/google"; // ① Google Fonts からインポート
+import { Noto_Sans, Noto_Sans_JP } from "next/font/google";
 import "./globals.css";
 
-// ② フォントの設定
-const maruGothic = Zen_Maru_Gothic({
-  weight: ["400", "500", "700", "900"], // 必要な太さを指定（数字が大きいほど太くなります）
-  subsets: ["latin", "cyrillic-ext"],   // ★超重要：これでモンゴル語（キリル文字）も綺麗になります
-  preload: false,                       // 日本語フォントは容量が大きいためpreloadをオフにすると安定します
+// ① 英語・キリル文字用のベースフォント（超軽量・爆速ロード）
+const notoSans = Noto_Sans({
+  weight: ["400", "500", "700"],
+  subsets: ["latin", "cyrillic"], // Noto Sansはキリル文字を完璧にサポートしています
+  variable: "--font-noto-sans",    // CSS変数として登録
+});
+
+// ② 日本語用のフォント（日本語の時だけ適用されるようにする）
+const notoSansJP = Noto_Sans_JP({
+  weight: ["400", "500", "700"],
+  subsets: ["latin"],              // 日本語フォント内の英数は使わないのでlatinだけでOK
+  variable: "--font-noto-sans-jp", // CSS変数として登録
 });
 
 export const metadata = {
-  title: 'Mazaalai Profile', // タイトルもアプリ名に合わせておきました！
+  title: 'Mazaalai Profile',
   description: 'Share your profile with friends!',
-}
+};
 
 export default function RootLayout({
   children,
@@ -19,10 +26,16 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    // ③ langを「mn（モンゴル語）」か「ja（日本語）」にする（今回はmn推奨、または消してもOK）
+    // モンゴル語主体のサイトなら lang="mn" で大正解です！
     <html lang="mn">
-      {/* ④ bodyのclassNameに maruGothic.className を追加 */}
-      <body className={`${maruGothic.className} antialiased`}>
+      <body 
+        className={`
+          ${notoSans.variable} 
+          ${notoSansJP.variable} 
+          font-sans 
+          antialiased
+        `}
+      >
         {children}
       </body>
     </html>

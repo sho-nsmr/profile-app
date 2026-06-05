@@ -1,9 +1,15 @@
 @import "tailwindcss";
 
-/* 1. 変数の定義（そのまま） */
+/* 1. 変数の定義 ＋ フォント変数の紐付け */
 :root {
   --background: #ffffff;
   --foreground: #171717;
+}
+
+/* ★ Tailwind v4 方式でカスタムフォントを登録 */
+@theme {
+  /* Next.jsから渡されるCSS変数(英数キリル, 日本語)を合成してデフォルトのsansに設定 */
+  --font-sans: var(--font-noto-sans), var(--font-noto-sans-jp), ui-sans-serif, system-ui, sans-serif;
 }
 
 /* 2. ダークモードの設定（そのまま） */
@@ -14,12 +20,15 @@
   }
 }
 
-/* 3. bodyの設定を「ゆるく」する */
-/* ここを書き換えることで、page.tsx の "bg-pink-50" が勝つようになります */
+/* 3. bodyの設定（フォントと微調整を追記） */
 body {
-  /* 固定の background を消して、Tailwindのクラスを優先させます */
   background-color: var(--background);
   color: var(--foreground);
-  /* フォントはお好みですが、一旦標準に */
-  font-family: ui-sans-serif, system-ui, sans-serif;
+  
+  /* ★ 登録したカスタムフォントを適用 */
+  font-family: var(--font-sans);
+  
+  /* ★ 脱Vibe Codingのための丁寧な文字間と行間 */
+  letter-spacing: 0.03em; 
+  line-height: 1.7;       
 }
