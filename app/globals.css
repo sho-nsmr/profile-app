@@ -1,18 +1,10 @@
 @import "tailwindcss";
 
-/* 1. 変数の定義 ＋ フォント変数の紐付け */
 :root {
   --background: #ffffff;
   --foreground: #171717;
 }
 
-/* ★ Tailwind v4 方式でカスタムフォントを登録 */
-@theme {
-  /* Next.jsから渡されるCSS変数(英数キリル, 日本語)を合成してデフォルトのsansに設定 */
-  --font-sans: var(--font-noto-sans), var(--font-noto-sans-jp), ui-sans-serif, system-ui, sans-serif;
-}
-
-/* 2. ダークモードの設定（そのまま） */
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
@@ -20,15 +12,14 @@
   }
 }
 
-/* 3. bodyの設定（フォントと微調整を追記） */
+/* bodyの設定：ここでNoto Sansの「丁寧な文字間と行間」を丸ゴシックに注入します */
 body {
   background-color: var(--background);
   color: var(--foreground);
   
-  /* ★ 登録したカスタムフォントを適用 */
-  font-family: var(--font-sans);
+  /* ★ 1文字ずつの間隔をほんの少し広げてあげる（脱・Vibe Codingの極意） */
+  letter-spacing: 0.04em; 
   
-  /* ★ 脱Vibe Codingのための丁寧な文字間と行間 */
-  letter-spacing: 0.03em; 
+  /* ★ 行の間隔をゆったり広げて、スマホでも圧倒的に読みやすくする */
   line-height: 1.7;       
 }
