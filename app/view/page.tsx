@@ -144,90 +144,92 @@ function ProfileContent() {
 
   const displayFood = FOOD_MAP[profile.food || ''] || profile.food || "Бүгд (全部)";
 
-  return (
-    <div className="flex flex-col items-center justify-center min-h-[75vh] relative w-full max-w-sm mx-auto">
+return (
+    <div className="flex flex-col items-center justify-center min-h-[75vh] relative w-full max-w-sm mx-auto">
+      
+      {/* 影エフェクト */}
+      <div className={`absolute bottom-10 w-32 h-4 bg-slate-900/10 rounded-[100%] blur-xl transition-all duration-[2000ms] ease-out ${isLanded ? "scale-125 opacity-30" : "scale-50 opacity-0 translate-y-10"}`} />
 
-      <div className={`absolute bottom-10 w-32 h-4 bg-slate-900/10 rounded-[100%] blur-xl transition-all duration-[2000ms] ease-out ${isLanded ? "scale-125 opacity-30" : "scale-50 opacity-0 translate-y-10"}`} />
+      {/* メインエリア */}
+      <div className={`relative z-10 transition-all duration-[1500ms] cubic-bezier(0.17, 0.67, 0.83, 0.67) ${isLanded ? "translate-y-0" : "-translate-y-[120vh]"}`}>
+        
+        {!isOpen ? (
+          <button 
+            onClick={() => setIsOpen(true)} 
+            className="group flex flex-col items-center cursor-pointer hover:scale-105 transition-transform active:scale-90"
+          >
+            <div className="relative">
+               <div className="text-9xl mb-4 animate-bounce duration-[2000ms]">🎈</div>
+            </div>
+            <div className="bg-white/80 backdrop-blur-sm px-8 py-3 rounded-2xl shadow-xl border-2 border-pink-300 text-pink-600 font-bold flex flex-col items-center">
+              <span>Нээж үзэх (開けてみる)</span>
+            </div>
+          </button>
+        ) : (
+          /* プロフィールカード本体 */
+          <div className="w-full bg-white rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] overflow-hidden border-4 border-white ring-1 ring-pink-100 animate-in zoom-in-95 duration-500 ease-out">
+            
+            <div className="bg-gradient-to-br from-pink-400 to-rose-400 p-8 text-white text-center relative">
+              <div className="absolute top-2 right-4 text-2xl opacity-40">✨</div>
+              <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3 backdrop-blur-md border border-white/30 text-4xl">👤</div>
+              <h1 className="text-2xl font-black tracking-tight leading-tight">
+                {profile.name}<span className="text-sm font-normal block opacity-90 mt-1">-ийн профайл -</span>
+              </h1>
+              {/* ★ 日付表示を残したまま元のサイズ感に調整 */}
+              {profile.savedAt && (
+                <p className="text-xs opacity-60 mt-1">{profile.savedAt}</p>
+              )}
+            </div>
 
-      <div className={`relative z-10 transition-all duration-[1500ms] cubic-bezier(0.17, 0.67, 0.83, 0.67) ${isLanded ? "translate-y-0" : "-translate-y-[120vh]"}`}>
+            <div className="p-8 space-y-5 bg-gradient-to-b from-white to-pink-50/30">
+              <div className="group">
+                <label className="flex items-center gap-2 text-[10px] text-pink-400 font-black uppercase tracking-widest mb-1 ml-1"><span>🎨</span> Хобби</label>
+                <div className="bg-white p-4 rounded-2xl border-2 border-pink-50 shadow-sm text-slate-700 font-bold tracking-tight">
+                  {profile.hobby || "Нууц (秘密)"}
+                </div>
+              </div>
 
-        {!isOpen ? (
-          <button
-            onClick={() => setIsOpen(true)}
-            className="group flex flex-col items-center cursor-pointer hover:scale-105 transition-transform active:scale-90"
-          >
-            <div className="relative">
-              <div className="text-9xl mb-4 animate-bounce duration-[2000ms]">🎈</div>
-            </div>
-            <div className="bg-white/80 backdrop-blur-sm px-8 py-3 rounded-2xl shadow-xl border-2 border-pink-300 text-pink-600 font-bold flex flex-col items-center">
-              <span>Нээж үзэх (開けてみる)</span>
-            </div>
-          </button>
-        ) : (
-          <div className="w-full bg-white rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] overflow-hidden border-4 border-white ring-1 ring-pink-100 animate-in zoom-in-95 duration-500 ease-out">
+              <div className="group">
+                <label className="flex items-center gap-2 text-[10px] text-pink-400 font-black uppercase tracking-widest mb-1 ml-1"><span>😋</span> Дуртай хоол</label>
+                <div className="bg-white p-4 rounded-2xl border-2 border-pink-50 shadow-sm text-pink-600 font-bold tracking-tight">
+                  {displayFood}
+                </div>
+              </div>
 
-            <div className="bg-gradient-to-br from-pink-400 to-rose-400 p-8 text-white text-center relative">
-              <div className="absolute top-2 right-4 text-2xl opacity-40">✨</div>
-              <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3 backdrop-blur-md border border-white/30 text-4xl">👤</div>
-              <h1 className="text-2xl font-black tracking-tight leading-tight">
-                {profile.name}<span className="text-sm font-normal block opacity-90 mt-1">-ийн профайл -</span>
-              </h1>
-              {/* ★ 作成日を表示 */}
-              {profile.savedAt && (
-                <p className="text-xs opacity-60 mt-1">{profile.savedAt}</p>
-              )}
-            </div>
+              <div className="group">
+                <label className="flex items-center gap-2 text-[10px] text-pink-400 font-black uppercase tracking-widest mb-1 ml-1"><span>🚀</span> Ирээдүйн хүсэл</label>
+                <div className="bg-pink-50/50 p-4 rounded-2xl border-2 border-dashed border-pink-200 text-slate-600 italic leading-relaxed">
+                  "{profile.dream || "Одоогоор байхгүй..."}"
+                </div>
+              </div>
 
-            <div className="p-8 space-y-5 bg-gradient-to-b from-white to-pink-50/30">
-              <div className="group">
-                <label className="flex items-center gap-2 text-[10px] text-pink-400 font-black uppercase tracking-widest mb-1 ml-1"><span>🎨</span> Хобби</label>
-                <div className="bg-white p-4 rounded-2xl border-2 border-pink-50 shadow-sm text-slate-700 font-bold tracking-tight">
-                  {profile.hobby || "Нууц (秘密)"}
-                </div>
-              </div>
+              <div className="mt-4 text-center text-[10px] text-pink-300 italic">
+                Энэ профайлыг {profile.name} бичсэн!
+              </div>
 
-              <div className="group">
-                <label className="flex items-center gap-2 text-[10px] text-pink-400 font-black uppercase tracking-widest mb-1 ml-1"><span>😋</span> Дуртай хоол</label>
-                <div className="bg-white p-4 rounded-2xl border-2 border-pink-50 shadow-sm text-pink-600 font-bold tracking-tight">
-                  {displayFood}
-                </div>
-              </div>
+              <div className="space-y-3 pt-4 border-t border-pink-100">
+                {!isFromBinder && (
+                  <button 
+                    onClick={saveToBinder}
+                    className="w-full py-4 bg-orange-400 text-white font-bold rounded-2xl shadow-lg hover:bg-orange-500 transition-all flex items-center justify-center gap-2 active:scale-95"
+                  >
+                    <span>📖</span> Хадгалах (バインダーに保存)
+                  </button>
+                )}
 
-              <div className="group">
-                <label className="flex items-center gap-2 text-[10px] text-pink-400 font-black uppercase tracking-widest mb-1 ml-1"><span>🚀</span> Ирээдүйн хүсэл</label>
-                <div className="bg-pink-50/50 p-4 rounded-2xl border-2 border-dashed border-pink-200 text-slate-600 italic leading-relaxed">
-                  "{profile.dream || "Одоогоор байхгүй..."}"
-                </div>
-              </div>
-
-              <div className="mt-4 text-center text-[10px] text-pink-300 italic">
-                Энэ профайлыг {profile.name} бичсэн!
-              </div>
-
-              <div className="space-y-3 pt-4 border-t border-pink-100">
-                {!isFromBinder && (
-                  <button
-                    onClick={saveToBinder}
-                    className="w-full py-4 bg-orange-400 text-white font-bold rounded-2xl shadow-lg hover:bg-orange-500 transition-all flex items-center justify-center gap-2 active:scale-95"
-                  >
-                    <span>📖</span> Хадгалах (バインダーに保存)
-                  </button>
-                )}
-
-                <Link
-                  href={isFromBinder ? "/binder" : "/"}
-                  className="flex items-center justify-center gap-2 w-full py-4 bg-slate-800 text-white font-bold rounded-2xl shadow-lg hover:bg-slate-900 transition-all active:scale-95 text-decoration-none"
-                >
-                  <span>🏠</span> {isFromBinder ? "Буцах (バインダーに戻る)" : "Буцах (トップに戻る)"}
-                </Link>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
+                <Link 
+                  href={isFromBinder ? "/binder" : "/"} 
+                  className="flex items-center justify-center gap-2 w-full py-4 bg-slate-800 text-white font-bold rounded-2xl shadow-lg hover:bg-slate-900 transition-all active:scale-95 text-decoration-none"
+                >
+                  <span>🏠</span> {isFromBinder ? "Буцах (バインダーに戻る)" : "Буцах (トップに戻る)"}
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );}
 
 export default function ViewPage() {
   return (
