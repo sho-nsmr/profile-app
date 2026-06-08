@@ -161,7 +161,7 @@ export default function Home() {
                       value={fatherInitial} 
                       onChange={(e) => setFatherInitial(e.target.value)} 
                       placeholder="Д"
-                      className="w-12 text-center p-4 rounded-2xl border-2 border-slate-100 focus:border-pink-400 focus:ring-4 focus:ring-pink-50 outline-none transition-all font-black text-slate-800 uppercase bg-white placeholder:text-slate-400 placeholder:font-normal"
+                      className="w-16 text-center py-4 px-2 rounded-2xl border-2 border-slate-100 focus:border-pink-400 focus:ring-4 focus:ring-pink-50 outline-none transition-all font-black text-slate-800 uppercase bg-white placeholder:text-slate-400 placeholder:font-normal"
                     />
                     <span className="font-bold text-xl text-pink-400">.</span>
                     <input 
@@ -333,7 +333,9 @@ export default function Home() {
   );
 }
 
-// ★ 2. 決定した絵文字(emoji)を動かすようにプロップスを拡張
+
+
+
 function SwipeIgnite({ emoji, onComplete }: { emoji: string; onComplete: () => void }) {
   const [startY, setStartY] = useState<number | null>(null);
   const [progress, setProgress] = useState(0);
@@ -341,14 +343,14 @@ function SwipeIgnite({ emoji, onComplete }: { emoji: string; onComplete: () => v
 
   return (
     <div
-      className="flex flex-col items-center justify-center select-none touch-none p-8 border-2 border-dashed border-pink-200 rounded-2xl bg-pink-50/50 min-h-[220px]"
+      className="flex flex-col items-center justify-center select-none touch-none p-8 border-2 border-dashed border-pink-200 rounded-2xl bg-pink-50/50 min-h-[260px] relative overflow-hidden"
       onTouchStart={(e) => { setStartY(e.touches[0].clientY); }}
       onTouchMove={(e) => {
         if (startY === null || triggered) return;
         if (e.cancelable) e.preventDefault(); 
         const currentY = e.touches[0].clientY;
         const diff = startY - currentY;
-        const p = Math.min(Math.max((diff / 150) * 100, 0), 100);
+        const p = Math.min(Math.max((diff / 130) * 100, 0), 100); // 少しスワイプしやすく調整
         setProgress(p);
         if (p >= 100 && !triggered) {
           setTriggered(true);
@@ -360,14 +362,21 @@ function SwipeIgnite({ emoji, onComplete }: { emoji: string; onComplete: () => v
         if (!triggered) setProgress(0);
       }}
     >
-      <div
-        className="text-7xl transition-transform duration-75 ease-out filter drop-shadow-md mb-2"
-        style={{ transform: `translateY(-${progress * 0.8}px)` }} 
-      >
+      {/* 上で待機しているターゲットアイテム（風船など） */}
+      <div className="text-6xl mb-4 filter drop-shadow-sm opacity-90 relative z-10">
         {emoji}
       </div>
-      <p className="text-xs mt-6 text-pink-500 font-black uppercase tracking-wider select-none">
-        {triggered ? "🚀 FLY AWAY!" : "↑ SWIPE UP"}
+
+      {/* 下からせり上がる「火」の絵文字 */}
+      <div
+        className="text-6xl transition-transform duration-75 ease-out filter drop-shadow-[0_4px_10px_rgba(239,68,68,0.4)] relative z-20 cursor-grab active:cursor-grabbing"
+        style={{ transform: `translateY(-${progress * 0.9}px)` }} 
+      >
+        🔥
+      </div>
+
+      <p className="text-xs mt-8 text-orange-500 font-black uppercase tracking-wider select-none animate-pulse">
+        {triggered ? "🚀 БУУДЛАА! (発射!)" : "↑ SWIPE FIRE UP"}
       </p>
     </div>
   );
