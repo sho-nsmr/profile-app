@@ -5,7 +5,6 @@ import QRCode from "react-qr-code";
 import Link from 'next/link';
 import LZString from 'lz-string';
 
-
 export default function Home() {
   const [fatherInitial, setFatherInitial] = useState(""); // （例: "Д"）
   const [name, setName] = useState(""); // 自分の名前（例: "Болд"）  
@@ -14,11 +13,11 @@ export default function Home() {
   const [food, setFood] = useState("");
   const [dream, setDream] = useState("");
   const [qrUrl, setQrUrl] = useState("");
+  const [compressedParam, setCompressedParam] = useState(""); // ★ currentParamの代わりに圧縮データを保持
   const [origin, setOrigin] = useState("");
   const [step, setStep] = useState<"form" | "ignite" | "loading" | "done">("form");
 
   const isFormValid = fatherInitial.trim() !== "" && name.trim() !== "" && origin !== "";
-
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -30,12 +29,17 @@ export default function Home() {
     setStep("loading");
 
     setTimeout(() => {
-
-      //文字列を「父称. 本名 (あだ名)」の形に整形（あだ名が無ければカッコは無し）
+      // 文字列を「父称. 本名 (あだ名)」の形に整形
       const formattedName = nickname.trim()
         ? `${fatherInitial.trim().toUpperCase()}. ${name.trim()} (${nickname.trim()})`
         : `${fatherInitial.trim().toUpperCase()}. ${name.trim()}`;
 
+      // ユーザーの現地時間（ローカルタイム）で YYYY-MM-DD 形式の文字列を作成
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const localDateStr = `${year}-${month}-${day}`;
 
       // savedAt（日付）をプロフィールデータに追加
       const profileData = {
@@ -43,12 +47,14 @@ export default function Home() {
         hobby,
         food,
         dream,
-        savedAt: new Date().toISOString().split('T')[0], // "2026-06-08" 形式
+        savedAt: localDateStr, // 現地時間基準の "2026-06-08" 形式
       };
+      
       const jsonStr = JSON.stringify(profileData);
       const compressedData = LZString.compressToEncodedURIComponent(jsonStr);
       const demoUrl = `${origin}/view?p=${compressedData}`;
 
+      setCompressedParam(compressedData); // ★ ステートに保存
       setQrUrl(demoUrl);
       setStep("done");
     }, 1800);
@@ -114,44 +120,44 @@ export default function Home() {
           </div>
 
           <div className="p-6 space-y-4">
-              <div className="space-y-3 p-3 bg-pink-50/50 rounded-2xl border border-pink-100">
-                <div>
-                  <label className="block text-pink-600 font-black mb-1 text-[10px] uppercase tracking-wider ml-1">Нэр (お名前) *</label>
-                  <div className="flex items-center gap-2">
-                   {/* 父称の頭文字入力 */}
-                     <input 
-                      type="text" 
-                      maxLength={1}
-                      value={fatherInitial} 
-                      onChange={(e) => setFatherInitial(e.target.value)} 
-                      className="w-14 border-b-2 border-pink-200 focus:border-pink-500 outline-none p-2 text-center uppercase font-black text-slate-700 bg-white" 
-                      placeholder="Д" 
-                    />
-                    <span className="font-bold text-xl text-pink-400">.</span>
-                    {/* 本名の入力 */}
-                    <input 
-                      type="text" 
-                      value={name} 
-                      onChange={(e) => setName(e.target.value)} 
-                      className="flex-1 border-b-2 border-pink-200 focus:border-pink-500 outline-none p-2 font-bold text-slate-700 bg-white" 
-                      placeholder="Болд" 
-                    />
-                  </div>
-           </div>
+            <div className="space-y-3 p-3 bg-pink-50/50 rounded-2xl border border-pink-100">
+              <div>
+                <label className="block text-pink-600 font-black mb-1 text-[10px] uppercase tracking-wider ml-1">Нэр (お名前) *</label>
+                <div className="flex items-center gap-2">
+                  {/* 父称の頭文字入力 */}
+                  <input 
+                    type="text" 
+                    maxLength={1}
+                    value={fatherInitial} 
+                    onChange={(e) => setFatherInitial(e.target.value)} 
+                    className="w-14 border-b-2 border-pink-200 focus:border-pink-500 outline-none p-2 text-center uppercase font-black text-slate-700 bg-white" 
+                    placeholder="Д" 
+                  />
+                  <span className="font-bold text-xl text-pink-400">.</span>
+                  {/* 本名の入力 */}
+                  <input 
+                    type="text" 
+                    value={name} 
+                    onChange={(e) => setName(e.target.value)} 
+                    className="flex-1 border-b-2 border-pink-200 focus:border-pink-500 outline-none p-2 font-bold text-slate-700 bg-white" 
+                    placeholder="Болд" 
+                  />
+                </div>
+              </div>
 
-                {/* あだ名（ニックネーム）の入力 */}
-           <div>
-             <label className="block text-pink-600 font-black mb-1 text-[10px] uppercase tracking-wider ml-1">Дуудах нэр (あだ名)</label>
-             <input 
-               type="text" 
-               value={nickname} 
-               onChange={(e) => setNickname(e.target.value)} 
-               className="w-full border-b-2 border-pink-100 focus:border-pink-500 outline-none p-2 text-sm font-medium text-slate-700 bg-white" 
-               placeholder="Болдоо (例: Boldoo)" 
-              />
+              {/* あだ名（ニックネーム）の入力 */}
+              <div>
+                <label className="block text-pink-600 font-black mb-1 text-[10px] uppercase tracking-wider ml-1">Дуудах нэр (あだ名)</label>
+                <input 
+                  type="text" 
+                  value={nickname} 
+                  onChange={(e) => setNickname(e.target.value)} 
+                  className="w-full border-b-2 border-pink-100 focus:border-pink-500 outline-none p-2 text-sm font-medium text-slate-700 bg-white" 
+                  placeholder="Болдоо (例: Boldoo)" 
+                />
+              </div>
             </div>
-          </div>
-    
+      
             <div>
               <label className="block text-pink-600 font-black mb-1 text-[10px] uppercase tracking-wider">Хобби (趣味)</label>
               <input type="text" value={hobby} onChange={(e) => setHobby(e.target.value)} className="w-full border-b-2 border-pink-100 focus:border-pink-500 focus:bg-pink-50/50 outline-none p-2 transition-all rounded font-bold" placeholder="Дуртай зүйл..." />
@@ -159,7 +165,7 @@ export default function Home() {
             <div>
               <label className="block text-pink-600 font-black mb-1 text-[10px] uppercase tracking-wider">Дуртай хоол (食べ物)</label>
               <select value={food} onChange={(e) => setFood(e.target.value)} className="w-full border-b-2 border-pink-100 focus:border-pink-500 outline-none p-2 bg-pink-50/30 rounded cursor-pointer font-bold">
-                <option value="">Сонгох...</option>
+                <option value="">С放гох...</option>
                 <option value="buuz">Бууз (ブーズ)</option>
                 <option value="khuushuur">Хуушуур (ホーショール)</option>
                 <option value="tsuivan">Цуйван (ツイワン)</option>
@@ -177,7 +183,7 @@ export default function Home() {
                 onClick={() => setStep("ignite")}
                 disabled={!isFormValid}
                 className={`w-full font-black py-4 rounded-full shadow-lg transition-all transform flex flex-col items-center justify-center
-                  ${!isFormValid // ★ 変更
+                  ${!isFormValid
                     ? "bg-slate-200 text-slate-400 cursor-not-allowed scale-100 shadow-none border-2 border-slate-300"
                     : "bg-gradient-to-r from-orange-400 via-red-500 to-pink-500 text-white hover:brightness-105 active:scale-95 shadow-xl"
                   }`} 
@@ -195,24 +201,72 @@ export default function Home() {
 
           {/* QRコードセクション */}
           {step === "done" && qrUrl && (
-            <div className="p-8 bg-white border-t-4 border-dashed border-sky-100 text-center flex flex-col items-center animate-in zoom-in-95 duration-700">
-              <div className="mb-6">
+            <div className="p-6 bg-sky-50/60 border-t-4 border-b-4 border-dashed border-sky-100 text-center flex flex-col items-center animate-in zoom-in-95 duration-700">
+              <div className="mb-4">
                 <p className="text-sky-500 font-black flex items-center justify-center gap-2 text-lg">
                   <span className="animate-bounce">🎈</span> ДЭЭШЭЭ ХӨӨРЛӨӨ!
                 </p>
                 <p className="text-[10px] text-sky-300 font-bold tracking-[0.2em] italic">READY TO SHARE</p>
               </div>
 
-              <div className="p-4 rounded-3xl bg-white shadow-2xl border-2 border-sky-50 ring-8 ring-sky-50/30">
+              <div className="p-4 rounded-3xl bg-white shadow-xl border-2 border-sky-50 ring-8 ring-sky-50/30">
                 <QRCode value={qrUrl} size={160} />
               </div>
 
-              <p className="mt-8 text-[11px] text-slate-400 font-bold leading-relaxed">
+              <p className="mt-4 text-[11px] text-slate-400 font-bold leading-relaxed">
                 QR кодыг найздаа уншуулаарай<br/>
                 (友達にスキャンしてもらってね)
               </p>
+
+              {/* ★ JSXコメントアウトの修正 ＆ currentParamをcompressedParamに修正 */}
+              <Link
+                href={`/screenshot?p=${compressedParam}`}
+                target="_blank"
+                className="mt-4 flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-r from-sky-500 to-indigo-500 text-white font-bold rounded-2xl shadow-md hover:brightness-105 active:scale-95 text-xs text-decoration-none animate-pulse"
+              >
+                <span>📸</span> Скриншот хийх хуудас (スクショ用画面を開く)
+              </Link>
             </div>
           )}
+
+          {/* ★ 並び替え：着火完了後、入力したプロフィール内容の「控え」を下に表示 */}
+          {step === "done" && (
+            <div className="p-6 space-y-4 bg-slate-50/50 animate-in fade-in duration-1000">
+              <p className="text-[10px] text-slate-400 font-black uppercase tracking-wider ml-1">Хадгалагдсан мэдээлэл (入力内容の控え)</p>
+              
+              <div className="p-3 bg-white rounded-xl border border-slate-100 shadow-sm text-sm">
+                <span className="text-slate-400 block text-[9px] font-bold uppercase">Нэр / 名前</span>
+                <span className="font-bold text-slate-800">{fatherInitial.trim().toUpperCase()}. {name.trim()} {nickname.trim() ? `(${nickname.trim()})` : ""}</span>
+              </div>
+
+              {hobby.trim() && (
+                <div className="p-3 bg-white rounded-xl border border-slate-100 shadow-sm text-sm">
+                  <span className="text-slate-400 block text-[9px] font-bold uppercase">Хобби / 趣味</span>
+                  <span className="font-medium text-slate-700">{hobby}</span>
+                </div>
+              )}
+
+              {food && (
+                <div className="p-3 bg-white rounded-xl border border-slate-100 shadow-sm text-sm">
+                  <span className="text-slate-400 block text-[9px] font-bold uppercase">Дуртай хоол / 食べ物</span>
+                  <span className="font-medium text-slate-700">
+                    {food === "buuz" && "Бууз (ブーズ)"}
+                    {food === "khuushuur" && "Хуушуур (ホーショール)"}
+                    {food === "tsuivan" && "Цуйван (ツイワン)"}
+                    {food === "horhog" && "Хорхог (ホルホグ)"}
+                  </span>
+                </div>
+              )}
+
+              {dream.trim() && (
+                <div className="p-3 bg-white rounded-xl border border-slate-100 shadow-sm text-sm">
+                  <span className="text-slate-400 block text-[9px] font-bold uppercase">Мөрөөдөл / 夢</span>
+                  <span className="font-medium text-slate-600 italic">"{dream}"</span>
+                </div>
+              )}
+            </div>
+          )}
+
         </div>
       </div>
 
@@ -222,7 +276,6 @@ export default function Home() {
     </div>
   );
 }
-
 
 function SwipeIgnite({ onComplete }: { onComplete: () => void }) {
   const [startY, setStartY] = useState<number | null>(null);
