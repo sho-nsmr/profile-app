@@ -83,7 +83,7 @@ export default function Home() {
       setCompressedParam(compressedData);
       setQrUrl(demoUrl);
       setStep("done");
-    }, 1800);
+    }, 2800);
   };
 
   return (
