@@ -1,45 +1,54 @@
 "use client";
 
-import React, { useState, useEffect } from 'react'; // useEffectを追加
+import React, { useState, useEffect } from 'react';
 import QRCode from "react-qr-code";
 import Link from 'next/link';
 import LZString from 'lz-string';
 
 
 export default function Home() {
-  const [name, setName] = useState("");
+  const [fatherInitial, setFatherInitial] = useState(""); // （例: "Д"）
+  const [name, setName] = useState(""); // 自分の名前（例: "Болд"）  
+  const [nickname, setNickname] = useState("");   // あだ名 (例: Boldoo)
   const [hobby, setHobby] = useState("");
   const [food, setFood] = useState("");
   const [dream, setDream] = useState("");
   const [qrUrl, setQrUrl] = useState("");
-  const [origin, setOrigin] = useState(""); // originを保存するステートを追加
+  const [origin, setOrigin] = useState("");
   const [step, setStep] = useState<"form" | "ignite" | "loading" | "done">("form");
 
+  const isFormValid = fatherInitial.trim() !== "" && name.trim() !== "" && origin !== "";
 
-  // マウント時に一度だけ実行してドメイン名を取得
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       setOrigin(window.location.origin);
     }
   }, []);
 
-
-  const safeBtoa = (str: string) => {
-    return btoa(unescape(encodeURIComponent(str)));
-  };
-
-
   const handleSave = () => {
-  //即座ロード
-   setStep("loading");
+    setStep("loading");
 
-    // 1.8秒間の「着火」演出
     setTimeout(() => {
-      const profileData = { name, hobby, food, dream };
+
+      //文字列を「父称. 本名 (あだ名)」の形に整形（あだ名が無ければカッコは無し）
+      const formattedName = nickname.trim()
+        ? `${fatherInitial.trim().toUpperCase()}. ${name.trim()} (${nickname.trim()})`
+        : `${fatherInitial.trim().toUpperCase()}. ${name.trim()}`;
+
+
+      // savedAt（日付）をプロフィールデータに追加
+      const profileData = {
+        name: formattedName,
+        hobby,
+        food,
+        dream,
+        savedAt: new Date().toISOString().split('T')[0], // "2026-06-08" 形式
+      };
       const jsonStr = JSON.stringify(profileData);
-      const compressedData = LZString.compressToEncodedURIComponent(jsonStr);      
-      const demoUrl = `${origin}/view?p=${compressedData}`;      
-      
+      const compressedData = LZString.compressToEncodedURIComponent(jsonStr);
+      const demoUrl = `${origin}/view?p=${compressedData}`;
+
       setQrUrl(demoUrl);
       setStep("done");
     }, 1800);
@@ -47,11 +56,11 @@ export default function Home() {
 
   return (
     <div className="relative min-h-screen bg-sky-100 p-4 text-slate-900 overflow-hidden">
-      
-      {/* バインダーへのリンク (アイコンのみのシンプル設計) */}
+
+      {/* バインダーへのリンク */}
       <div className="absolute top-4 right-4 z-30">
-        <Link 
-          href="/binder" 
+        <Link
+          href="/binder"
           className="flex flex-col items-center group no-underline focus:outline-none"
         >
           <div className="bg-white p-3 rounded-2xl shadow-lg group-hover:bg-orange-50 transition-all border-2 border-orange-200 active:scale-90 flex items-center justify-center w-14 h-14">
@@ -60,10 +69,10 @@ export default function Home() {
         </Link>
       </div>
 
-{/* 雲の背景レイヤー (修正済み) */}
+      {/* 雲の背景レイヤー */}
       <div className={`fixed inset-0 pointer-events-none transition-transform duration-[3000ms] ease-out ${qrUrl ? "translate-y-20" : "translate-y-0"}`}>
         <div className="absolute top-[15%] left-[10%] text-4xl opacity-10">☁️</div>
-        <div className="absolute top-[45%] right-[15%] text-3xl opacity-10">☁️</div> 
+        <div className="absolute top-[45%] right-[15%] text-3xl opacity-10">☁️</div>
         <div className="absolute bottom-[20%] left-[25%] text-5xl opacity-10">☁️</div>
         <div className="absolute top-[5%] right-[25%] text-6xl opacity-20">☁️</div>
         <div className="absolute top-[60%] left-[5%] text-7xl opacity-20">☁️</div>
@@ -72,27 +81,21 @@ export default function Home() {
         <div className="absolute -bottom-10 left-[15%] text-9xl opacity-25">☁️</div>
       </div>
 
-      {/* --- 強化された「着火」ローディング演出 --- */}
+      {/* ローディング演出 */}
       {step === "loading" && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-orange-600/90 backdrop-blur-md text-white animate-in fade-in duration-300">
-          {/* 背景の熱気を感じさせるパルスアニメーション */}
           <div className="absolute inset-0 bg-gradient-to-t from-red-600/30 to-transparent animate-pulse" />
-          
           <div className="relative flex flex-col items-center">
-            {/* 激しく揺れる火のアイコン */}
             <div className="text-8xl animate-bounce mb-6 filter drop-shadow-[0_0_20px_rgba(255,255,255,0.5)]">🔥</div>
-            
-            {/* 進行状況を示すドット */}
             <div className="flex gap-2 mb-6">
               {[0, 1, 2].map((i) => (
-                <div 
-                  key={i} 
-                  className="w-3 h-3 bg-white rounded-full animate-bounce" 
-                  style={{ animationDelay: `${i * 0.15}s` }} 
+                <div
+                  key={i}
+                  className="w-3 h-3 bg-white rounded-full animate-bounce"
+                  style={{ animationDelay: `${i * 0.15}s` }}
                 />
               ))}
             </div>
-
             <h2 className="text-2xl font-black tracking-widest text-center">
               ГАЛ АСААЖ БАЙНА...<br/>
               <span className="text-sm font-bold opacity-80 uppercase tracking-normal">Preparing to fly!</span>
@@ -104,17 +107,51 @@ export default function Home() {
       {/* メインカード */}
       <div className={`max-w-md mx-auto pt-16 transition-all duration-[2000ms] ease-in-out ${qrUrl ? "-translate-y-10 scale-105" : "translate-y-0"}`}>
         <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-pink-200 relative z-10">
-          
+
           <div className={`bg-pink-400 p-6 text-white text-center transition-colors duration-1000 ${qrUrl ? "bg-gradient-to-b from-pink-400 to-orange-400" : ""}`}>
             <h1 className="text-2xl font-black tracking-widest">МИНИЙ PROFILE 🎈</h1>
             <p className="text-xs mt-1 font-medium italic opacity-90">Найзууддаа өөрийгөө танилцуулаарай!</p>
           </div>
 
           <div className="p-6 space-y-4">
-            <div>
-              <label className="block text-pink-600 font-black mb-1 text-[10px] uppercase tracking-wider">Нэр (名前) *</label>
-              <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full border-b-2 border-pink-100 focus:border-pink-500 focus:bg-pink-50/50 outline-none p-2 transition-all rounded font-bold" placeholder="Нэрээ бичнэ үү..." />
+              <div className="space-y-3 p-3 bg-pink-50/50 rounded-2xl border border-pink-100">
+                <div>
+                  <label className="block text-pink-600 font-black mb-1 text-[10px] uppercase tracking-wider ml-1">Нэр (お名前) *</label>
+                  <div className="flex items-center gap-2">
+                   {/* 父称の頭文字入力 */}
+                     <input 
+                      type="text" 
+                      maxLength={1}
+                      value={fatherInitial} 
+                      onChange={(e) => setFatherInitial(e.target.value)} 
+                      className="w-14 border-b-2 border-pink-200 focus:border-pink-500 outline-none p-2 text-center uppercase font-black text-slate-700 bg-white" 
+                      placeholder="Д" 
+                    />
+                    <span className="font-bold text-xl text-pink-400">.</span>
+                    {/* 本名の入力 */}
+                    <input 
+                      type="text" 
+                      value={name} 
+                      onChange={(e) => setName(e.target.value)} 
+                      className="flex-1 border-b-2 border-pink-200 focus:border-pink-500 outline-none p-2 font-bold text-slate-700 bg-white" 
+                      placeholder="Болд" 
+                    />
+                  </div>
+           </div>
+
+                {/* あだ名（ニックネーム）の入力 */}
+           <div>
+             <label className="block text-pink-600 font-black mb-1 text-[10px] uppercase tracking-wider ml-1">Дуудах нэр (あだ名)</label>
+             <input 
+               type="text" 
+               value={nickname} 
+               onChange={(e) => setNickname(e.target.value)} 
+               className="w-full border-b-2 border-pink-100 focus:border-pink-500 outline-none p-2 text-sm font-medium text-slate-700 bg-white" 
+               placeholder="Болдоо (例: Boldoo)" 
+              />
             </div>
+          </div>
+    
             <div>
               <label className="block text-pink-600 font-black mb-1 text-[10px] uppercase tracking-wider">Хобби (趣味)</label>
               <input type="text" value={hobby} onChange={(e) => setHobby(e.target.value)} className="w-full border-b-2 border-pink-100 focus:border-pink-500 focus:bg-pink-50/50 outline-none p-2 transition-all rounded font-bold" placeholder="Дуртай зүйл..." />
@@ -133,37 +170,31 @@ export default function Home() {
               <label className="block text-pink-600 font-black mb-1 text-[10px] uppercase tracking-wider">Ирээдүйн хүсэл (夢)</label>
               <textarea value={dream} onChange={(e) => setDream(e.target.value)} className="w-full border-2 border-pink-100 focus:border-pink-400 outline-none p-3 bg-pink-50/30 rounded-xl h-20 resize-none text-sm font-medium" placeholder="Мөрөөдөл..." />
             </div>
-            
 
-          {step === "form" && (
-            <button 
-              type="button" 
-              onClick={() => setStep("ignite")} // 名前が入っている時しか押せないので、直接遷移してOK
-              disabled={!name.trim()} // ★名前が空の時はボタンを無効化
-              className={`w-full font-black py-4 rounded-full shadow-lg transition-all transform flex flex-col items-center justify-center
-                ${!name.trim() 
-                  ? "bg-slate-200 text-slate-400 cursor-not-allowed scale-100 shadow-none border-2 border-slate-300" // ★無効時の見た目
-                  : "bg-gradient-to-r from-orange-400 via-red-500 to-pink-500 text-white hover:brightness-105 active:scale-95 shadow-xl" // ★有効時の見た目
-                }`}
-  >
-    <span className="text-lg">ГАЛ АСААХ (着火)</span>
-  </button>
-)}
+            {step === "form" && (
+              <button
+                type="button"
+                onClick={() => setStep("ignite")}
+                disabled={!isFormValid}
+                className={`w-full font-black py-4 rounded-full shadow-lg transition-all transform flex flex-col items-center justify-center
+                  ${!isFormValid // ★ 変更
+                    ? "bg-slate-200 text-slate-400 cursor-not-allowed scale-100 shadow-none border-2 border-slate-300"
+                    : "bg-gradient-to-r from-orange-400 via-red-500 to-pink-500 text-white hover:brightness-105 active:scale-95 shadow-xl"
+                  }`} 
+               >
+                <span className="text-lg">ГАЛ АСААХ (着火)</span>
+              </button>
+            )}
 
-{step === "ignite" && (
-  <div className="mt-6">
-    <SwipeIgnite
-      onComplete={() => {
-        handleSave(); // スワイプが完了したらローディング＆保存へ
-      }}
-    />
-  </div>
-)}
-</div>
-
+            {step === "ignite" && (
+              <div className="mt-6">
+                <SwipeIgnite onComplete={() => { handleSave(); }} />
+              </div>
+            )}
+          </div>
 
           {/* QRコードセクション */}
-          {step === "done" && qrUrl &&  (
+          {step === "done" && qrUrl && (
             <div className="p-8 bg-white border-t-4 border-dashed border-sky-100 text-center flex flex-col items-center animate-in zoom-in-95 duration-700">
               <div className="mb-6">
                 <p className="text-sky-500 font-black flex items-center justify-center gap-2 text-lg">
@@ -171,11 +202,11 @@ export default function Home() {
                 </p>
                 <p className="text-[10px] text-sky-300 font-bold tracking-[0.2em] italic">READY TO SHARE</p>
               </div>
-              
+
               <div className="p-4 rounded-3xl bg-white shadow-2xl border-2 border-sky-50 ring-8 ring-sky-50/30">
                 <QRCode value={qrUrl} size={160} />
               </div>
-              
+
               <p className="mt-8 text-[11px] text-slate-400 font-bold leading-relaxed">
                 QR кодыг найздаа уншуулаарай<br/>
                 (友達にスキャンしてもらってね)
@@ -185,8 +216,6 @@ export default function Home() {
         </div>
       </div>
 
-
-
       <p className="text-center text-sky-400/40 text-[9px] mt-12 relative z-10 tracking-[0.3em] font-bold uppercase">
         © 2026 Mazaalai Profile
       </p>
@@ -195,10 +224,6 @@ export default function Home() {
 }
 
 
-
-
-
-// スワイプ演出を外に置くこと
 function SwipeIgnite({ onComplete }: { onComplete: () => void }) {
   const [startY, setStartY] = useState<number | null>(null);
   const [progress, setProgress] = useState(0);
@@ -207,22 +232,14 @@ function SwipeIgnite({ onComplete }: { onComplete: () => void }) {
   return (
     <div
       className="flex flex-col items-center justify-center select-none touch-none p-4 border-2 border-dashed border-pink-200 rounded-2xl bg-pink-50/20"
-      onTouchStart={(e) => {
-        setStartY(e.touches[0].clientY);
-      }}
+      onTouchStart={(e) => { setStartY(e.touches[0].clientY); }}
       onTouchMove={(e) => {
         if (startY === null || triggered) return;
-        
-        // 通常のスクロールを防止してスワイプ操作に集中させる
         if (e.cancelable) e.preventDefault();
-
         const currentY = e.touches[0].clientY;
-        const diff = startY - currentY; // 上方向のスワイプ
-        
-        // 感度調整（120px引っ張ったらMAXになるように調整）
+        const diff = startY - currentY;
         const p = Math.min(Math.max((diff / 120) * 100, 0), 100);
         setProgress(p);
-
         if (p >= 100 && !triggered) {
           setTriggered(true);
           onComplete();
@@ -230,14 +247,10 @@ function SwipeIgnite({ onComplete }: { onComplete: () => void }) {
       }}
       onTouchEnd={() => {
         setStartY(null);
-        // トリガーされていない場合のみリセット
-        if (!triggered) {
-          setProgress(0);
-        }
+        if (!triggered) setProgress(0);
       }}
     >
-      {/* 進行度に合わせてバルーンを上に移動させる演出を追加 */}
-      <div 
+      <div
         className="text-6xl transition-transform duration-75 ease-out"
         style={{ transform: `translateY(-${progress * 0.4}px)` }}
       >
