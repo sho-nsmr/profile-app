@@ -118,25 +118,45 @@ export default function Home() {
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-orange-600/90 backdrop-blur-md text-white animate-in fade-in duration-300">
           <div className="absolute inset-0 bg-gradient-to-t from-red-600/30 to-transparent animate-pulse" />
           <div className="relative flex flex-col items-center">
-            {/* ★ 飛んでいくアイテムがここでも炎の上でバウンド！ */}
-            <div className="text-8xl animate-bounce mb-6 filter drop-shadow-[0_0_20px_rgba(255,255,255,0.5)]">{flyingItem}</div>
-            <div className="flex gap-2 mb-6">
-              {[0, 1, 2].map((i) => (
-                <div
-                  key={i}
-                  className="w-3 h-3 bg-white rounded-full animate-bounce"
-                  style={{ animationDelay: `${i * 0.15}s` }}
-                />
-              ))}
-            </div>
-            <h2 className="text-2xl font-black tracking-widest text-center">
-              ГАЛ АСААЖ БАЙНА...<br/>
-              <span className="text-sm font-bold opacity-80 uppercase tracking-normal">Preparing to fly!</span>
-            </h2>
-          </div>
-        </div>
-      )}
 
+         {/* 下から上へ突き抜けるカスタムアニメーションを適用 */}
+         <div 
+          className="text-8xl filter drop-shadow-[0_0_20px_rgba(255,255,255,0.5)] absolute"
+          style={{
+            animation: 'flyUpContinuous 1.5s linear infinite'
+          }}
+        >
+          {flyingItem}
+        </div>
+
+        {/* インラインCSSで上に昇るアニメーションのキーフレームを定義 */}
+        <style>{`
+         @keyframes flyUpContinuous {
+           0% { transform: translateY(120px) scale(0.9); opacity: 0; }
+           15% { opacity: 1; }
+           85% { opacity: 1; }
+           100% { transform: translateY(-120px) scale(1.05); opacity: 0; }
+          }
+        `}</style>
+
+    </div>
+
+    {/* 三つのドットのぽよぽよアニメーション */}
+    <div className="flex gap-2 mb-6 mt-2">
+      {[0, 1, 2].map((i) => (
+        <div
+          key={i}
+          className="w-3 h-3 bg-white rounded-full animate-bounce"
+          style={{ animationDelay: `${i * 0.15}s` }}
+        />
+      ))}
+    </div>
+    <h2 className="text-2xl font-black tracking-widest text-center">
+      ГАЛ АСААЖ БАЙНА...<br/>
+      <span className="text-sm font-bold opacity-80 uppercase tracking-normal">Preparing to fly!</span>
+    </h2>
+  </div>
+)}
       {/* メインカード */}
       <div className={`max-w-md mx-auto pt-16 transition-all duration-[2000ms] ease-in-out ${qrUrl ? "-translate-y-10 scale-105" : "translate-y-0"}`}>
         <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-pink-200 relative z-10">
@@ -154,7 +174,8 @@ export default function Home() {
               <div className="space-y-3 p-3 bg-pink-50/50 rounded-2xl border border-pink-100">
                 <div>
                   <label className="block text-pink-600 font-black mb-1 text-[10px] uppercase tracking-wider ml-1">Нэр (お名前) *</label>
-                  <div className="flex items-center gap-2">
+                  {/* flex-wrap を追加し、小さな画面でもはみ出さずに綺麗に収まるように調整 */}
+                  <div className="flex flex-wrap sm:flex-nowrap items-center gap-2">
                     <input 
                       type="text" 
                       maxLength={1}
