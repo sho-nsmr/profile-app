@@ -6,16 +6,21 @@ import Link from 'next/link';
 import LZString from 'lz-string';
 
 export default function Home() {
-  const [fatherInitial, setFatherInitial] = useState(""); // （例: "Д"）
-  const [name, setName] = useState(""); // 自分の名前（例: "Болд"）  
-  const [nickname, setNickname] = useState("");   // あだ名 (例: Boldoo)
+  const [fatherInitial, setFatherInitial] = useState(""); 
+  const [name, setName] = useState(""); 
+  const [nickname, setNickname] = useState("");   
   const [hobby, setHobby] = useState("");
   const [food, setFood] = useState("");
   const [dream, setDream] = useState("");
   const [qrUrl, setQrUrl] = useState("");
-  const [compressedParam, setCompressedParam] = useState(""); // ★ currentParamの代わりに圧縮データを保持
+  const [compressedParam, setCompressedParam] = useState(""); 
   const [origin, setOrigin] = useState("");
   const [step, setStep] = useState<"form" | "ignite" | "loading" | "done">("form");
+
+  // ★ 1. 消火エフェクト用のステート
+  const [isExtinguishing, setIsExtinguishing] = useState(false);
+  // ★ 2. 今回飛ぶアイテムの絵文字を保持するステート
+  const [flyingItem, setFlyingItem] = useState("🎈");
 
   const isFormValid = fatherInitial.trim() !== "" && name.trim() !== "" && origin !== "";
 
@@ -25,43 +30,64 @@ export default function Home() {
     }
   }, []);
 
+  // ★ 着火モーダルを開くときに、確率でアイテムを決定する
+  const handleOpenIgnite = () => {
+    const rand = Math.random(); // 0.0 以上 1.0 未満
+    if (rand < 0.80) {
+      setFlyingItem("🎈"); // 80%
+    } else if (rand < 0.87) {
+      setFlyingItem("🚀"); // 7%
+    } else if (rand < 0.94) {
+      setFlyingItem("🛸"); // 7%
+    } else {
+      setFlyingItem("🧸"); // 6%
+    }
+    setStep("ignite");
+  };
+
+  // ★ 💧ボタンが押されたときの消火処理
+  const handleExtinguish = () => {
+    setIsExtinguishing(true); // 水色の膜を表示
+    setTimeout(() => {
+      setStep("form");        // フォームに戻す
+      setIsExtinguishing(false);
+    }, 400); // 0.4秒のシュッとした演出のあと切り替え
+  };
+
   const handleSave = () => {
     setStep("loading");
 
     setTimeout(() => {
-      // 文字列を「父称. 本名 (あだ名)」の形に整形
       const formattedName = nickname.trim()
         ? `${fatherInitial.trim().toUpperCase()}. ${name.trim()} (${nickname.trim()})`
         : `${fatherInitial.trim().toUpperCase()}. ${name.trim()}`;
 
-      // ユーザーの現地時間（ローカルタイム）で YYYY-MM-DD 形式の文字列を作成
       const now = new Date();
       const year = now.getFullYear();
       const month = String(now.getMonth() + 1).padStart(2, '0');
       const day = String(now.getDate()).padStart(2, '0');
       const localDateStr = `${year}-${month}-${day}`;
 
-      // savedAt（日付）をプロフィールデータに追加
       const profileData = {
         name: formattedName,
         hobby,
         food,
         dream,
-        savedAt: localDateStr, // 現地時間基準の "2026-06-08" 形式
+        savedAt: localDateStr,
       };
       
       const jsonStr = JSON.stringify(profileData);
       const compressedData = LZString.compressToEncodedURIComponent(jsonStr);
       const demoUrl = `${origin}/view?p=${compressedData}`;
 
-      setCompressedParam(compressedData); // ★ ステートに保存
+      setCompressedParam(compressedData);
       setQrUrl(demoUrl);
       setStep("done");
     }, 1800);
   };
 
   return (
-    <div className="relative min-h-screen bg-sky-100 p-4 text-slate-900 overflow-hidden">
+    <div className="relative min-h-screen bg-sky-100 p-4 text-slate-900 overflow-hidden select-none">
 
       {/* バインダーへのリンク */}
       <div className="absolute top-4 right-4 z-30">
@@ -92,7 +118,8 @@ export default function Home() {
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-orange-600/90 backdrop-blur-md text-white animate-in fade-in duration-300">
           <div className="absolute inset-0 bg-gradient-to-t from-red-600/30 to-transparent animate-pulse" />
           <div className="relative flex flex-col items-center">
-            <div className="text-8xl animate-bounce mb-6 filter drop-shadow-[0_0_20px_rgba(255,255,255,0.5)]">🔥</div>
+            {/* ★ 飛んでいくアイテムがここでも炎の上でバウンド！ */}
+            <div className="text-8xl animate-bounce mb-6 filter drop-shadow-[0_0_20px_rgba(255,255,255,0.5)]">{flyingItem}</div>
             <div className="flex gap-2 mb-6">
               {[0, 1, 2].map((i) => (
                 <div
@@ -115,72 +142,73 @@ export default function Home() {
         <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-pink-200 relative z-10">
 
           <div className={`bg-pink-400 p-6 text-white text-center transition-colors duration-1000 ${qrUrl ? "bg-gradient-to-b from-pink-400 to-orange-400" : ""}`}>
-            <h1 className="text-2xl font-black tracking-widest">МИНИЙ PROFILE 🎈</h1>
+            {/* ★ Doneの時は上でも選択されたアイテムを表示して特別感を演出 */}
+            <h1 className="text-2xl font-black tracking-widest">
+              МИНИЙ PROFILE {step === "done" ? flyingItem : "🎈"}
+            </h1>
             <p className="text-xs mt-1 font-medium italic opacity-90">Найзууддаа өөрийгөө танилцуулаарай!</p>
           </div>
 
-          <div className="p-6 space-y-4">
-            <div className="space-y-3 p-3 bg-pink-50/50 rounded-2xl border border-pink-100">
-              <div>
-                <label className="block text-pink-600 font-black mb-1 text-[10px] uppercase tracking-wider ml-1">Нэр (お名前) *</label>
-                <div className="flex items-center gap-2">
-                  {/* 父称の頭文字入力 */}
+          {step !== "done" ? (
+            <div className="p-6 space-y-4">
+              <div className="space-y-3 p-3 bg-pink-50/50 rounded-2xl border border-pink-100">
+                <div>
+                  <label className="block text-pink-600 font-black mb-1 text-[10px] uppercase tracking-wider ml-1">Нэр (お名前) *</label>
+                  <div className="flex items-center gap-2">
+                    <input 
+                      type="text" 
+                      maxLength={1}
+                      value={fatherInitial} 
+                      onChange={(e) => setFatherInitial(e.target.value)} 
+                      placeholder="Д"
+                      className="w-12 text-center p-4 rounded-2xl border-2 border-slate-100 focus:border-pink-400 focus:ring-4 focus:ring-pink-50 outline-none transition-all font-black text-slate-800 uppercase bg-white placeholder:text-slate-400 placeholder:font-normal"
+                    />
+                    <span className="font-bold text-xl text-pink-400">.</span>
+                    <input 
+                      type="text" 
+                      value={name} 
+                      onChange={(e) => setName(e.target.value)} 
+                      placeholder="Болд" 
+                      className="flex-1 p-4 rounded-2xl border-2 border-slate-100 focus:border-pink-400 focus:ring-4 focus:ring-pink-50 outline-none transition-all font-black text-slate-800 bg-white placeholder:text-slate-400 placeholder:font-normal"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-pink-600 font-black mb-1 text-[10px] uppercase tracking-wider ml-1">Дуудах нэр (あだ名)</label>
                   <input 
                     type="text" 
-                    maxLength={1}
-                    value={fatherInitial} 
-                    onChange={(e) => setFatherInitial(e.target.value)} 
-                    className="w-14 border-b-2 border-pink-200 focus:border-pink-500 outline-none p-2 text-center uppercase font-black text-slate-700 bg-white" 
-                    placeholder="Д" 
-                  />
-                  <span className="font-bold text-xl text-pink-400">.</span>
-                  {/* 本名の入力 */}
-                  <input 
-                    type="text" 
-                    value={name} 
-                    onChange={(e) => setName(e.target.value)} 
-                    className="flex-1 border-b-2 border-pink-200 focus:border-pink-500 outline-none p-2 font-bold text-slate-700 bg-white" 
-                    placeholder="Болд" 
+                    value={nickname} 
+                    onChange={(e) => setNickname(e.target.value)} 
+                    className="w-full p-4 rounded-2xl border-2 border-slate-100 focus:border-pink-400 focus:ring-4 focus:ring-pink-50 outline-none transition-all font-bold text-slate-800 bg-white placeholder:text-slate-400 placeholder:font-normal" 
+                    placeholder="Болдоо (例: Boldoo)" 
                   />
                 </div>
               </div>
-
-              {/* あだ名（ニックネーム）の入力 */}
+        
               <div>
-                <label className="block text-pink-600 font-black mb-1 text-[10px] uppercase tracking-wider ml-1">Дуудах нэр (あだ名)</label>
-                <input 
-                  type="text" 
-                  value={nickname} 
-                  onChange={(e) => setNickname(e.target.value)} 
-                  className="w-full border-b-2 border-pink-100 focus:border-pink-500 outline-none p-2 text-sm font-medium text-slate-700 bg-white" 
-                  placeholder="Болдоо (例: Boldoo)" 
-                />
+                <label className="block text-pink-600 font-black mb-1 text-[10px] uppercase tracking-wider">Хобби (趣味)</label>
+                <input type="text" value={hobby} onChange={(e) => setHobby(e.target.value)} className="w-full border-b-2 border-pink-100 focus:border-pink-500 focus:bg-pink-50/50 outline-none p-2 transition-all rounded font-bold text-slate-800 bg-white" placeholder="Дуртай зүйл..." />
               </div>
-            </div>
-      
-            <div>
-              <label className="block text-pink-600 font-black mb-1 text-[10px] uppercase tracking-wider">Хобби (趣味)</label>
-              <input type="text" value={hobby} onChange={(e) => setHobby(e.target.value)} className="w-full border-b-2 border-pink-100 focus:border-pink-500 focus:bg-pink-50/50 outline-none p-2 transition-all rounded font-bold" placeholder="Дуртай зүйл..." />
-            </div>
-            <div>
-              <label className="block text-pink-600 font-black mb-1 text-[10px] uppercase tracking-wider">Дуртай хоол (食べ物)</label>
-              <select value={food} onChange={(e) => setFood(e.target.value)} className="w-full border-b-2 border-pink-100 focus:border-pink-500 outline-none p-2 bg-pink-50/30 rounded cursor-pointer font-bold">
-                <option value="">Сонгох...</option>
-                <option value="buuz">Бууз (ボーズ)</option>
-                <option value="khuushuur">Хуушуур (ホーショール)</option>
-                <option value="tsuivan">Цуйван (ツォイワン)</option>
-                <option value="horhog">Хорхог (ホルホグ)</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-pink-600 font-black mb-1 text-[10px] uppercase tracking-wider">Ирээдүйн хүсэл (夢)</label>
-              <textarea value={dream} onChange={(e) => setDream(e.target.value)} className="w-full border-2 border-pink-100 focus:border-pink-400 outline-none p-3 bg-pink-50/30 rounded-xl h-20 resize-none text-sm font-medium" placeholder="Мөрөөдөл..." />
-            </div>
+              <div>
+                <label className="block text-pink-600 font-black mb-1 text-[10px] uppercase tracking-wider">Дуртай хоол (食べ物)</label>
+                <select value={food} onChange={(e) => setFood(e.target.value)} className="w-full border-b-2 border-pink-100 focus:border-pink-500 outline-none p-2 bg-white rounded cursor-pointer font-bold text-slate-800">
+                  <option value="">Сонгох...</option>
+                  <option value="buuz">Бууз (ボーズ)</option>
+                  <option value="khuushuur">Хуушуур (ホーショール)</option>
+                  <option value="tsuivan">Цуйван (ツォイワン)</option>
+                  <option value="horhog">Хорхог (ホルホグ)</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-pink-600 font-black mb-1 text-[10px] uppercase tracking-wider">Ирээдүйн хүсэл (夢)</label>
+                <textarea value={dream} onChange={(e) => setDream(e.target.value)} className="w-full border-2 border-pink-100 focus:border-pink-400 outline-none p-3 bg-white text-slate-800 rounded-xl h-20 resize-none text-sm font-medium" placeholder="Мөрөөдөл..." />
+              </div>
 
-            {step === "form" && (
+              {/* 着火ボタン：確率抽選関数を呼ぶ */}
               <button
                 type="button"
-                onClick={() => setStep("ignite")}
+                onClick={handleOpenIgnite}
                 disabled={!isFormValid}
                 className={`w-full font-black py-4 rounded-full shadow-lg transition-all transform flex flex-col items-center justify-center
                   ${!isFormValid
@@ -190,85 +218,113 @@ export default function Home() {
                >
                 <span className="text-lg">ГАЛ АСААХ (着火)</span>
               </button>
-            )}
-
-            {step === "ignite" && (
-              <div className="mt-6">
-                <SwipeIgnite onComplete={() => { handleSave(); }} />
-              </div>
-            )}
-          </div>
-
-          {/* QRコードセクション */}
-          {step === "done" && qrUrl && (
-            <div className="p-6 bg-sky-50/60 border-t-4 border-b-4 border-dashed border-sky-100 text-center flex flex-col items-center animate-in zoom-in-95 duration-700">
-              <div className="mb-4">
-                <p className="text-sky-500 font-black flex items-center justify-center gap-2 text-lg">
-                  <span className="animate-bounce">🎈</span> ДЭЭШЭЭ ХӨӨРЛӨӨ!
-                </p>
-                <p className="text-[10px] text-sky-300 font-bold tracking-[0.2em] italic">READY TO SHARE</p>
-              </div>
-
-              <div className="p-4 rounded-3xl bg-white shadow-xl border-2 border-sky-50 ring-8 ring-sky-50/30">
-                <QRCode value={qrUrl} size={160} />
-              </div>
-
-              <p className="mt-4 text-[11px] text-slate-400 font-bold leading-relaxed">
-                QR кодыг найздаа уншуулаарай<br/>
-                (友達にスキャンしてもらってね)
-              </p>
-
-              {/* ★ JSXコメントアウトの修正 ＆ currentParamをcompressedParamに修正 */}
-              <Link
-                href={`/screenshot?p=${compressedParam}`}
-                target="_blank"
-                className="mt-4 flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-r from-sky-500 to-indigo-500 text-white font-bold rounded-2xl shadow-md hover:brightness-105 active:scale-95 text-xs text-decoration-none animate-pulse"
-              >
-                <span>📸</span> Скриншот хийх хуудас (スクショ用画面を開く)
-              </Link>
             </div>
-          )}
+          ) : (
+            // 着火完了（done）時
+            <div>
+              {qrUrl && (
+                <div className="p-6 bg-sky-50/60 border-b-4 border-dashed border-sky-100 text-center flex flex-col items-center animate-in zoom-in-95 duration-700">
+                  <div className="mb-4">
+                    <p className="text-sky-500 font-black flex items-center justify-center gap-2 text-lg">
+                      <span className="animate-bounce">{flyingItem}</span> ДЭЭШЭЭ ХӨӨРЛӨӨ!
+                    </p>
+                    <p className="text-[10px] text-sky-300 font-bold tracking-[0.2em] italic">READY TO SHARE</p>
+                  </div>
 
-          {/* ★ 並び替え：着火完了後、入力したプロフィール内容の「控え」を下に表示 */}
-          {step === "done" && (
-            <div className="p-6 space-y-4 bg-slate-50/50 animate-in fade-in duration-1000">
-              <p className="text-[10px] text-slate-400 font-black uppercase tracking-wider ml-1">Хадгалагдсан мэдээлэл (入力内容の控え)</p>
-              
-              <div className="p-3 bg-white rounded-xl border border-slate-100 shadow-sm text-sm">
-                <span className="text-slate-400 block text-[9px] font-bold uppercase">Нэр / 名前</span>
-                <span className="text-slate-600">{fatherInitial.trim().toUpperCase()}. {name.trim()} {nickname.trim() ? `(${nickname.trim()})` : ""}</span>
+                  <div className="p-4 rounded-3xl bg-white shadow-xl border-2 border-sky-50 ring-8 ring-sky-50/30">
+                    <QRCode value={qrUrl} size={160} />
+                  </div>
+
+                  <p className="mt-4 text-[11px] text-slate-400 font-bold leading-relaxed">
+                    QR кодыг найздаа уншуулаарай<br/>
+                    (友達にスキャンしてもらってね)
+                  </p>
+
+                  <Link
+                    href={`/screenshot?p=${compressedParam}`}
+                    target="_blank"
+                    className="mt-4 flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-r from-sky-500 to-indigo-500 text-white font-bold rounded-2xl shadow-md hover:brightness-105 active:scale-95 text-xs text-decoration-none animate-pulse"
+                  >
+                    <span>📸</span> Скриншот хийх хуудас (スクショ用画面を開く)
+                  </Link>
+                </div>
+              )}
+
+              <div className="p-6 space-y-4 bg-slate-50/50 animate-in fade-in duration-1000">
+                <p className="text-[10px] text-slate-400 font-black uppercase tracking-wider ml-1">Хадгалагдсан мэдээлэл (入力内容の控え)</p>
+                
+                <div className="p-3 bg-white rounded-xl border border-slate-100 shadow-sm text-sm">
+                  <span className="text-slate-400 block text-[9px] font-bold uppercase">Нэр / 名前</span>
+                  <span className="font-black text-slate-800">{fatherInitial.trim().toUpperCase()}. {name.trim()} {nickname.trim() ? `(${nickname.trim()})` : ""}</span>
+                </div>
+
+                {hobby.trim() && (
+                  <div className="p-3 bg-white rounded-xl border border-slate-100 shadow-sm text-sm">
+                    <span className="text-slate-400 block text-[9px] font-bold uppercase">Хобби / 趣味</span>
+                    <span className="font-normal text-slate-600">{hobby}</span>
+                  </div>
+                )}
+
+                {food && (
+                  <div className="p-3 bg-white rounded-xl border border-slate-100 shadow-sm text-sm">
+                    <span className="text-slate-400 block text-[9px] font-bold uppercase">Дуртай хоол / 食べ物</span>
+                    <span className="font-medium text-slate-700">
+                      {food === "buuz" && "Бууз (ブーズ)"}
+                      {food === "khuushuur" && "Хуушуур (ホーショール)"}
+                      {food === "tsuivan" && "Цуйван (ツイワン)"}
+                      {food === "horhog" && "Хорхог (ホルホグ)"}
+                    </span>
+                  </div>
+                )}
+
+                {dream.trim() && (
+                  <div className="p-3 bg-white rounded-xl border border-slate-100 shadow-sm text-sm">
+                    <span className="text-slate-400 block text-[9px] font-bold uppercase">Мөрөөдөл / 夢</span>
+                    <span className="font-medium text-slate-600 italic">"{dream}"</span>
+                  </div>
+                )}
               </div>
-
-              {hobby.trim() && (
-                <div className="p-3 bg-white rounded-xl border border-slate-100 shadow-sm text-sm">
-                  <span className="text-slate-400 block text-[9px] font-bold uppercase">Хобби / 趣味</span>
-                  <span className="font-normal text-slate-550">{hobby}</span>
-                </div>
-              )}
-
-              {food && (
-                <div className="p-3 bg-white rounded-xl border border-slate-100 shadow-sm text-sm">
-                  <span className="text-slate-400 block text-[9px] font-bold uppercase">Дуртай хоол / 食べ物</span>
-                  <span className="font-medium text-slate-700">
-                    {food === "buuz" && "Бууз (ブーズ)"}
-                    {food === "khuushuur" && "Хуушуур (ホーショール)"}
-                    {food === "tsuivan" && "Цуйван (ツイワン)"}
-                    {food === "horhog" && "Хорхог (ホルホグ)"}
-                  </span>
-                </div>
-              )}
-
-              {dream.trim() && (
-                <div className="p-3 bg-white rounded-xl border border-slate-100 shadow-sm text-sm">
-                  <span className="text-slate-400 block text-[9px] font-bold uppercase">Мөрөөдөл / 夢</span>
-                  <span className="font-medium text-slate-600 italic">"{dream}"</span>
-                </div>
-              )}
             </div>
           )}
 
         </div>
       </div>
+
+      {/* 画面中央スワイプ用のフルスクリーンレイヤー（モーダル演出） */}
+      {step === "ignite" && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl border-4 border-pink-300 text-center relative animate-in zoom-in-95 duration-300">
+            
+            {/* 💧 水の戻るボタン（消火処理を呼び出す） */}
+            <button 
+              onClick={handleExtinguish}
+              className="absolute top-4 right-4 w-10 h-10 rounded-full bg-blue-50 hover:bg-blue-100 transition-all flex items-center justify-center text-xl shadow-sm border border-blue-100 active:scale-90 focus:outline-none z-10"
+              title="Буцах (戻る)"
+            >
+              💧
+            </button>
+
+            <h3 className="text-lg font-black text-slate-800 mb-1 mt-4">БЭЛЭН БОЛЛОО! {flyingItem}</h3>
+            <p className="text-[11px] text-slate-400 font-bold mb-6">
+              Дээшээ шудраад галаа асаагаарай<br/>
+              (上にスワイプして着火！)
+            </p>
+
+            {/* ガチャで選ばれた絵文字をスワイプコンポーネントに渡す */}
+            <SwipeIgnite emoji={flyingItem} onComplete={handleSave} />
+          </div>
+
+          {/* ★ 1. シュッ💨と消火する水のエフェクトレイヤー */}
+          {isExtinguishing && (
+            <div className="absolute inset-0 bg-sky-400/90 backdrop-blur-md z-50 animate-in fade-in zoom-in-95 duration-300 flex items-center justify-center">
+              <div className="text-center text-white">
+                <div className="text-6xl animate-ping mb-2">💨</div>
+                <div className="font-black text-xl tracking-widest">УНТРААЛАА... (消火中)</div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       <p className="text-center text-sky-400/40 text-[9px] mt-12 relative z-10 tracking-[0.3em] font-bold uppercase">
         © 2026 Mazaalai Profile
@@ -277,21 +333,22 @@ export default function Home() {
   );
 }
 
-function SwipeIgnite({ onComplete }: { onComplete: () => void }) {
+// ★ 2. 決定した絵文字(emoji)を動かすようにプロップスを拡張
+function SwipeIgnite({ emoji, onComplete }: { emoji: string; onComplete: () => void }) {
   const [startY, setStartY] = useState<number | null>(null);
   const [progress, setProgress] = useState(0);
   const [triggered, setTriggered] = useState(false);
 
   return (
     <div
-      className="flex flex-col items-center justify-center select-none touch-none p-4 border-2 border-dashed border-pink-200 rounded-2xl bg-pink-50/20"
+      className="flex flex-col items-center justify-center select-none touch-none p-8 border-2 border-dashed border-pink-200 rounded-2xl bg-pink-50/50 min-h-[220px]"
       onTouchStart={(e) => { setStartY(e.touches[0].clientY); }}
       onTouchMove={(e) => {
         if (startY === null || triggered) return;
-        if (e.cancelable) e.preventDefault();
+        if (e.cancelable) e.preventDefault(); 
         const currentY = e.touches[0].clientY;
         const diff = startY - currentY;
-        const p = Math.min(Math.max((diff / 120) * 100, 0), 100);
+        const p = Math.min(Math.max((diff / 150) * 100, 0), 100);
         setProgress(p);
         if (p >= 100 && !triggered) {
           setTriggered(true);
@@ -304,20 +361,14 @@ function SwipeIgnite({ onComplete }: { onComplete: () => void }) {
       }}
     >
       <div
-        className="text-6xl transition-transform duration-75 ease-out"
-        style={{ transform: `translateY(-${progress * 0.4}px)` }}
+        className="text-7xl transition-transform duration-75 ease-out filter drop-shadow-md mb-2"
+        style={{ transform: `translateY(-${progress * 0.8}px)` }} 
       >
-        🎈
+        {emoji}
       </div>
-      <p className="text-xs mt-2 text-pink-500 font-bold animate-pulse">
-        {triggered ? "🚀 IGNITED!" : "↑ Swipe up to ignite"}
+      <p className="text-xs mt-6 text-pink-500 font-black uppercase tracking-wider select-none">
+        {triggered ? "🚀 FLY AWAY!" : "↑ SWIPE UP"}
       </p>
-      <div className="w-40 h-2 bg-pink-100 rounded-full mt-3 overflow-hidden">
-        <div
-          className="h-full bg-gradient-to-r from-orange-400 to-pink-500 transition-all duration-75"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
     </div>
   );
 }
