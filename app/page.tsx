@@ -166,9 +166,9 @@ export default function Home() {
               <label className="block text-pink-600 font-black mb-1 text-[10px] uppercase tracking-wider">Дуртай хоол (食べ物)</label>
               <select value={food} onChange={(e) => setFood(e.target.value)} className="w-full border-b-2 border-pink-100 focus:border-pink-500 outline-none p-2 bg-pink-50/30 rounded cursor-pointer font-bold">
                 <option value="">Сонгох...</option>
-                <option value="buuz">Бууз (ブーズ)</option>
+                <option value="buuz">Бууз (ボーズ)</option>
                 <option value="khuushuur">Хуушуур (ホーショール)</option>
-                <option value="tsuivan">Цуйван (ツイワン)</option>
+                <option value="tsuivan">Цуйван (ツォイワン)</option>
                 <option value="horhog">Хорхог (ホルホグ)</option>
               </select>
             </div>
@@ -236,13 +236,13 @@ export default function Home() {
               
               <div className="p-3 bg-white rounded-xl border border-slate-100 shadow-sm text-sm">
                 <span className="text-slate-400 block text-[9px] font-bold uppercase">Нэр / 名前</span>
-                <span className="font-bold text-slate-800">{fatherInitial.trim().toUpperCase()}. {name.trim()} {nickname.trim() ? `(${nickname.trim()})` : ""}</span>
+                <span className="text-slate-600">{fatherInitial.trim().toUpperCase()}. {name.trim()} {nickname.trim() ? `(${nickname.trim()})` : ""}</span>
               </div>
 
               {hobby.trim() && (
                 <div className="p-3 bg-white rounded-xl border border-slate-100 shadow-sm text-sm">
                   <span className="text-slate-400 block text-[9px] font-bold uppercase">Хобби / 趣味</span>
-                  <span className="font-medium text-slate-700">{hobby}</span>
+                  <span className="font-normal text-slate-550">{hobby}</span>
                 </div>
               )}
 
