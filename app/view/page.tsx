@@ -148,15 +148,25 @@ return (
     <div className="flex flex-col items-center justify-center min-h-[75vh] relative w-full max-w-sm mx-auto">
       
       {/* 影エフェクト */}
-      <div className={`absolute bottom-10 w-32 h-4 bg-slate-900/10 rounded-[100%] blur-xl transition-all duration-[2000ms] ease-out ${isLanded ? "scale-125 opacity-30" : "scale-50 opacity-0 translate-y-10"}`} />
+      <div className={`absolute bottom-10 w-32 h-4 bg-slate-900/10 rounded-[100%] blur-xl 
+        ${isFromBinder 
+          ? "scale-125 opacity-30" 
+          : "transition-all duration-[2000ms] ease-out " + (isLanded ? "scale-125 opacity-30" : "scale-50 opacity-0 translate-y-10")
+        }`} 
+      />
 
       {/* メインエリア */}
-      <div className={`relative z-10 transition-all duration-[1500ms] cubic-bezier(0.17, 0.67, 0.83, 0.67) ${isLanded ? "translate-y-0" : "-translate-y-[120vh]"}`}>
-        
+      <div className={`relative z-10 w-full 
+        ${isFromBinder 
+          ? "translate-y-0" 
+          : "transition-all duration-[1500ms] cubic-bezier(0.17, 0.67, 0.83, 0.67) " + (isLanded ? "translate-y-0" : "-translate-y-[120vh]")
+        }`}
+      >
+
         {!isOpen ? (
           <button 
             onClick={() => setIsOpen(true)} 
-            className="group flex flex-col items-center cursor-pointer hover:scale-105 transition-transform active:scale-90"
+            className="group flex flex-col items-center cursor-pointer hover:scale-105 transition-transform active:scale-90 mx-auto"
           >
             <div className="relative">
                <div className="text-9xl mb-4 animate-bounce duration-[2000ms]">🎈</div>
@@ -166,8 +176,14 @@ return (
             </div>
           </button>
         ) : (
-          /* プロフィールカード本体 */
-          <div className="w-full bg-white rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] overflow-hidden border-4 border-white ring-1 ring-pink-100 animate-in zoom-in-95 duration-500 ease-out">
+
+          /* プロフィールカード本体: バインダーからの場合はアニメーションクラス(animate-in等)を完全削除 */
+          <div className={`w-full bg-white rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] overflow-hidden border-4 border-white ring-1 ring-pink-100
+            ${isFromBinder 
+              ? "" 
+              : "animate-in zoom-in-95 duration-500 ease-out"
+            }`}
+          >
             
             <div className="bg-gradient-to-br from-pink-400 to-rose-400 p-8 text-white text-center relative">
               <div className="absolute top-2 right-4 text-2xl opacity-40">✨</div>
@@ -175,7 +191,6 @@ return (
               <h1 className="text-2xl font-black tracking-tight leading-tight">
                 {profile.name}<span className="text-sm font-normal block opacity-90 mt-1">-ийн профайл -</span>
               </h1>
-              {/* ★ 日付表示を残したまま元のサイズ感に調整 */}
               {profile.savedAt && (
                 <p className="text-xs opacity-60 mt-1">{profile.savedAt}</p>
               )}

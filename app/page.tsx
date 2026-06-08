@@ -165,7 +165,7 @@ export default function Home() {
             <div>
               <label className="block text-pink-600 font-black mb-1 text-[10px] uppercase tracking-wider">Дуртай хоол (食べ物)</label>
               <select value={food} onChange={(e) => setFood(e.target.value)} className="w-full border-b-2 border-pink-100 focus:border-pink-500 outline-none p-2 bg-pink-50/30 rounded cursor-pointer font-bold">
-                <option value="">С放гох...</option>
+                <option value="">Сонгох...</option>
                 <option value="buuz">Бууз (ブーズ)</option>
                 <option value="khuushuur">Хуушуур (ホーショール)</option>
                 <option value="tsuivan">Цуйван (ツイワン)</option>
