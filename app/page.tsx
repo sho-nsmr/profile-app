@@ -189,7 +189,7 @@ export default function Home() {
                       type="text" 
                       value={name} 
                       onChange={(e) => setName(e.target.value)} 
-                      placeholder="Батболд" 
+                      placeholder="Болд" 
                       className="flex-1 p-4 rounded-2xl border-2 border-slate-100 focus:border-pink-400 focus:ring-4 focus:ring-pink-50 outline-none transition-all font-black text-slate-800 bg-white placeholder:text-slate-400 placeholder:font-normal"
                     />
                   </div>
@@ -357,198 +357,48 @@ export default function Home() {
 
 
 
-function SwipeIgnite({
-  emoji,
-  onComplete,
-}: {
-  emoji: string;
-  onComplete: () => void;
-}) {
-  const containerRef = React.useRef<HTMLDivElement>(null);
-
-  const [fireY, setFireY] = React.useState<number | null>(null);
-  const [triggered, setTriggered] = React.useState(false);
-  const [particles, setParticles] = React.useState<number[]>([]);
-
-  const containerHeightRef = React.useRef(260);
-  const lastYRef = React.useRef<number>(0);
-
-  const isActive = fireY !== null;
-
-  // =========================
-  // pointer unified input
-  // =========================
-
-  const getY = (clientY: number) => {
-    const rect = containerRef.current!.getBoundingClientRect();
-    containerHeightRef.current = rect.height;
-    return Math.max(0, Math.min(clientY - rect.top, rect.height));
-  };
-
-  const handleStart = (clientY: number) => {
-    if (triggered) return;
-    const y = getY(clientY);
-    setFireY(y);
-    lastYRef.current = y;
-  };
-
-  const handleMove = (clientY: number) => {
-    if (triggered || fireY === null) return;
-
-    const y = getY(clientY);
-
-    lastYRef.current = fireY;
-    setFireY(y);
-
-    const distanceToTop = y;
-    const velocity = lastYRef.current - y;
-
-    // 🔥衝突判定（軽く勢いも見る）
-    if (distanceToTop <= 10 && velocity > 2 && !triggered) {
-      setTriggered(true);
-      explode();
-    }
-  };
-
-  const handleEnd = () => {
-    if (triggered) return;
-
-    // スプリングバック
-    setFireY(containerHeightRef.current * 0.85);
-  };
-
-  // =========================
-  // explosion particles
-  // =========================
-
-  const explode = () => {
-    const count = 18;
-    setParticles(Array.from({ length: count }, (_, i) => i));
-
-    setTimeout(() => {
-      onComplete();
-    }, 400);
-  };
-
-  // =========================
-  // derived values
-  // =========================
-
-  const progress =
-    fireY !== null
-      ? 1 - fireY / containerHeightRef.current
-      : 0;
-
-  const scale = 1 + progress * 0.7;
-  const glow = progress * 30;
-
-  const heat = Math.min(progress * 1.2, 1);
+function SwipeIgnite({ emoji, onComplete }: { emoji: string; onComplete: () => void }) {
+  const [startY, setStartY] = useState<number | null>(null);
+  const [progress, setProgress] = useState(0);
+  const [triggered, setTriggered] = useState(false);
 
   return (
     <div
-      ref={containerRef}
-      className="relative flex flex-col items-center justify-center select-none touch-none p-8 border-2 border-dashed border-pink-200 rounded-2xl bg-pink-50/50 min-h-[260px] overflow-hidden"
-      style={{
-        background: `linear-gradient(
-          to top,
-          rgba(255, 90, 0, ${heat * 0.55}),
-          rgba(255, 255, 255, 0)
-        )`,
-      }}
-      onTouchStart={(e) => handleStart(e.touches[0].clientY)}
+      className="flex flex-col items-center justify-center select-none touch-none p-8 border-2 border-dashed border-pink-200 rounded-2xl bg-pink-50/50 min-h-[260px] relative overflow-hidden"
+      onTouchStart={(e) => { setStartY(e.touches[0].clientY); }}
       onTouchMove={(e) => {
-        if (e.cancelable) e.preventDefault();
-        handleMove(e.touches[0].clientY);
+        if (startY === null || triggered) return;
+        if (e.cancelable) e.preventDefault(); 
+        const currentY = e.touches[0].clientY;
+        const diff = startY - currentY;
+        const p = Math.min(Math.max((diff / 130) * 100, 0), 100); // 少しスワイプしやすく調整
+        setProgress(p);
+        if (p >= 100 && !triggered) {
+          setTriggered(true);
+          onComplete();
+        }
       }}
-      onTouchEnd={handleEnd}
-      onMouseDown={(e) => handleStart(e.clientY)}
-      onMouseMove={(e) => {
-        if (e.buttons !== 1) return;
-        handleMove(e.clientY);
+      onTouchEnd={() => {
+        setStartY(null);
+        if (!triggered) setProgress(0);
       }}
-      onMouseUp={handleEnd}
     >
-      {/* =========================
-          🎈 target emoji
-      ========================= */}
-      <div
-        className={`text-6xl mb-4 transition-transform duration-75 ${
-          triggered ? "animate-pulse" : ""
-        }`}
-        style={{
-          transform: `scale(${triggered ? 1.2 : 1})`,
-        }}
-      >
-        {triggered ? "💥" : emoji}
+      {/* 上で待機しているターゲットアイテム（風船など） */}
+      <div className="text-6xl mb-4 filter drop-shadow-sm opacity-90 relative z-10">
+        {emoji}
       </div>
 
-      {/* =========================
-          🔥 fire (finger synced)
-      ========================= */}
-      {fireY !== null && !triggered && (
-        <div
-          className="absolute left-1/2 -translate-x-1/2 text-6xl pointer-events-none"
-          style={{
-            bottom: fireY,
-            transform: `translateX(-50%) scale(${scale})`,
-            filter: `drop-shadow(0 0 ${glow}px rgba(255,120,0,0.9))`,
-          }}
-        >
-          🔥
-        </div>
-      )}
+      {/* 下からせり上がる「火」の絵文字 */}
+      <div
+        className="text-6xl transition-transform duration-75 ease-out filter drop-shadow-[0_4px_10px_rgba(239,68,68,0.4)] relative z-20 cursor-grab active:cursor-grabbing"
+        style={{ transform: `translateY(-${progress * 0.9}px)` }} 
+      >
+        🔥
+      </div>
 
-      {/* =========================
-          💥 particles
-      ========================= */}
-      {triggered && (
-        <div className="absolute inset-0 pointer-events-none">
-          {particles.map((i) => {
-            const angle = (i / particles.length) * Math.PI * 2;
-            const distance = 80 + Math.random() * 40;
-
-            const x = Math.cos(angle) * distance;
-            const y = Math.sin(angle) * distance;
-
-            return (
-              <div
-                key={i}
-                className="absolute left-1/2 top-1/2 text-2xl"
-                style={{
-                  transform: `translate(${x}px, ${y}px)`,
-                  opacity: 0,
-                  animation: "particleBurst 0.4s ease-out forwards",
-                }}
-              >
-                {emoji}
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* =========================
-          instruction
-      ========================= */}
-      <p className="text-xs mt-8 text-orange-500 font-black uppercase tracking-wider select-none">
-        {triggered ? "💥 БУУДЛАА!" : "↑ SWIPE FIRE UP"}
+      <p className="text-xs mt-8 text-orange-500 font-black uppercase tracking-wider select-none animate-pulse">
+        {triggered ? "🚀 БУУДЛАА! (発射!)" : "↑ SWIPE FIRE UP"}
       </p>
-
-      {/* =========================
-          particle animation
-      ========================= */}
-      <style>{`
-        @keyframes particleBurst {
-          0% {
-            transform: translate(0, 0) scale(1);
-            opacity: 1;
-          }
-          100% {
-            transform: translate(var(--x, 0px), var(--y, 0px)) scale(0.2);
-            opacity: 0;
-          }
-        }
-      `}</style>
     </div>
   );
 }
