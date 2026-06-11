@@ -7,7 +7,7 @@ import LZString from "lz-string";
 const FOOD_MAP: Record<string, string> = {
   buuz: "Бууз (ブーズ)",
   khuushuur: "Хуушуур (ホーショール)",
-  tsuivan: "Цуйван (ツイワン)",
+  tsuivan: "Цуйван (ツォイワン)",
   horhog: "Хорхог (ホルホグ)"
 };
 

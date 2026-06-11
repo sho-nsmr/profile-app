@@ -201,7 +201,7 @@ function ProfileContent() {
               </div>
 
               <div className="group">
-                <label className="flex items-center gap-2 text-[10px] text-pink-400 font-black uppercase tracking-widest mb-1 ml-1"><span>😋</span> Дуртай хоол</label>
+                <label className="flex items-center gap-2 text-[10px] text-pink-400 font-black uppercase tracking-widest mb-1 ml-1"><span>🍴</span> Дуртай хоол</label>
                 <div className="bg-white p-4 rounded-2xl border-2 border-pink-50 shadow-sm text-pink-600 font-bold tracking-tight">
                   {displayFood}
                 </div>
