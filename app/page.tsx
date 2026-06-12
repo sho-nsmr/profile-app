@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import QRCode from "react-qr-code";
 import Link from 'next/link';
 import LZString from 'lz-string';
@@ -189,7 +189,7 @@ export default function Home() {
                       type="text" 
                       value={name} 
                       onChange={(e) => setName(e.target.value)} 
-                      placeholder="Болд" 
+                      placeholder="Батболд" 
                       className="flex-1 p-4 rounded-2xl border-2 border-slate-100 focus:border-pink-400 focus:ring-4 focus:ring-pink-50 outline-none transition-all font-black text-slate-800 bg-white placeholder:text-slate-400 placeholder:font-normal"
                     />
                   </div>
@@ -357,47 +357,175 @@ export default function Home() {
 
 
 
+// ─────────────────────────────────────────────
+// ファイル末尾の SwipeIgnite 関数を以下で置き換え [written by Claude]
+// ─────────────────────────────────────────────
+
 function SwipeIgnite({ emoji, onComplete }: { emoji: string; onComplete: () => void }) {
-  const [startY, setStartY] = useState<number | null>(null);
-  const [progress, setProgress] = useState(0);
-  const [triggered, setTriggered] = useState(false);
+  const [dragOffset, setDragOffset] = useState(0);
+  const [startY, setStartY]         = useState<number | null>(null);
+  const [triggered, setTriggered]   = useState(false);
+  const [releasing, setReleasing]   = useState(false);
+  const isDone = useRef(false); // stale closure を避けるため ref で管理
+
+  const MAX_TRAVEL  = 150;
+  const progress    = Math.min(dragOffset / MAX_TRAVEL, 1);
+  const isNearBalloon = progress > 0.55;
+  const isVeryClose   = progress > 0.82;
+
+  // ── マウス操作対応（Vercel プレビュー確認用） ──────────────
+  useEffect(() => {
+    if (startY === null) return;
+
+    const onMove = (e: MouseEvent) => {
+      if (isDone.current) return;
+      const moved = Math.max(0, startY - e.clientY);
+      setDragOffset(moved);
+      if (moved >= MAX_TRAVEL) {
+        isDone.current = true;
+        setTriggered(true);
+        setTimeout(() => onComplete(), 750);
+      }
+    };
+
+    const onUp = () => {
+      if (isDone.current) return;
+      setStartY(null);
+      setReleasing(true);
+      setDragOffset(0);
+      setTimeout(() => setReleasing(false), 600);
+    };
+
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup",   onUp);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup",   onUp);
+    };
+  }, [startY, onComplete]);
+
+  // ── タッチ操作 ──────────────────────────────────────────────
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (e.cancelable) e.preventDefault();
+    if (isDone.current || startY === null) return;
+    const moved = Math.max(0, startY - e.touches[0].clientY);
+    setDragOffset(moved);
+    if (moved >= MAX_TRAVEL) {
+      isDone.current = true;
+      setTriggered(true);
+      setTimeout(() => onComplete(), 750);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (isDone.current) return;
+    setStartY(null);
+    setReleasing(true);
+    setDragOffset(0);
+    setTimeout(() => setReleasing(false), 600);
+  };
+
+  // ── 炎のビジュアル計算 ──────────────────────────────────────
+  // 指に 1:1 追従。ドラッグ量 = 炎の移動量（ピクセル単位）
+  const fireTranslateY = releasing ? 0 : -Math.min(dragOffset, MAX_TRAVEL);
+  const fireScale      = releasing ? 1 : 1 + progress * 0.9;
+  const glowPx         = Math.round(progress * 32);
+  const glowColor      = `rgba(255, ${Math.round(160 - progress * 120)}, 0, 0.75)`;
+
+  // 風船シェイクのスピード：炎が近づくほど加速
+  const shakeSpeed = `${Math.max(0.17, 0.28 - progress * 0.12).toFixed(2)}s`;
 
   return (
     <div
-      className="flex flex-col items-center justify-center select-none touch-none p-8 border-2 border-dashed border-pink-200 rounded-2xl bg-pink-50/50 min-h-[260px] relative overflow-hidden"
-      onTouchStart={(e) => { setStartY(e.touches[0].clientY); }}
-      onTouchMove={(e) => {
-        if (startY === null || triggered) return;
-        if (e.cancelable) e.preventDefault(); 
-        const currentY = e.touches[0].clientY;
-        const diff = startY - currentY;
-        const p = Math.min(Math.max((diff / 130) * 100, 0), 100); // 少しスワイプしやすく調整
-        setProgress(p);
-        if (p >= 100 && !triggered) {
-          setTriggered(true);
-          onComplete();
-        }
+      className="relative flex flex-col items-center rounded-2xl border-2 border-dashed border-pink-200 select-none touch-none overflow-hidden"
+      style={{
+        height: 268,
+        // 炎の高さに連動して、コンテナ下部から暖かいグラデーションが立ち上る
+        background: `linear-gradient(to top,
+          rgba(251,146,60,${(0.04 + progress * 0.22).toFixed(3)}) 0%,
+          transparent ${Math.round(35 + progress * 45)}%)`,
+        transition: releasing ? "background 0.5s" : "background 0.08s",
       }}
-      onTouchEnd={() => {
-        setStartY(null);
-        if (!triggered) setProgress(0);
+      onTouchStart={e => {
+        if (e.cancelable) e.preventDefault();
+        if (!isDone.current) setStartY(e.touches[0].clientY);
       }}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onMouseDown={e => { if (!isDone.current) { setReleasing(false); setStartY(e.clientY); } }}
     >
-      {/* 上で待機しているターゲットアイテム（風船など） */}
-      <div className="text-6xl mb-4 filter drop-shadow-sm opacity-90 relative z-10">
+      <style>{`
+        /* 風船：炎が近づくと揺れる */
+        @keyframes balloonShake {
+          0%,100% { transform: rotate(0deg); }
+          25%     { transform: rotate(-7deg) scale(1.07); }
+          75%     { transform: rotate( 7deg) scale(1.07); }
+        }
+        /* 着火：風船が上に打ち上がる */
+        @keyframes launch {
+          0%   { transform: scale(1)   translateY(  0px); opacity: 1; }
+          15%  { transform: scale(1.5) translateY(-18px); opacity: 1; }
+          100% { transform: scale(0.3) translateY(-230px); opacity: 0; }
+        }
+        /* 着火：炎が弾ける */
+        @keyframes fireExplode {
+          0%   { transform: scale(1)   translateY( 0px); opacity: 1; }
+          40%  { transform: scale(2.5) translateY(-22px); opacity: 0.9; }
+          100% { transform: scale(0)   translateY(-44px); opacity: 0; }
+        }
+      `}</style>
+
+      {/* ── 風船（上で待つ。着火されると打ち上がる） ─────────── */}
+      <div
+        className="absolute top-8 text-6xl leading-none pointer-events-none"
+        style={{
+          animation: triggered
+            ? "launch 0.7s cubic-bezier(0.2, 0, 0.8, 1) forwards"
+            : isNearBalloon
+            ? `balloonShake ${shakeSpeed} ease-in-out infinite`
+            : "none",
+          filter: isVeryClose
+            ? "drop-shadow(0 0 20px rgba(255,100,0,0.95))"
+            : isNearBalloon
+            ? "drop-shadow(0 0 9px rgba(255,160,0,0.55))"
+            : "none",
+          transition: "filter 0.2s",
+        }}
+      >
         {emoji}
       </div>
 
-      {/* 下からせり上がる「火」の絵文字 */}
+      {/* ── 炎（指に直接追従する） ────────────────────────────── */}
       <div
-        className="text-6xl transition-transform duration-75 ease-out filter drop-shadow-[0_4px_10px_rgba(239,68,68,0.4)] relative z-20 cursor-grab active:cursor-grabbing"
-        style={{ transform: `translateY(-${progress * 0.9}px)` }} 
+        className="absolute leading-none pointer-events-none"
+        style={{
+          bottom: 28,
+          fontSize: "3.5rem",
+          transform: `translateY(${fireTranslateY}px) scale(${fireScale})`,
+          transition: releasing
+            ? "transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1)" // バネで戻る
+            : triggered
+            ? "none"
+            : "transform 0.04s linear", // 指に同期
+          filter: triggered
+            ? "none"
+            : `drop-shadow(0 0 ${glowPx}px ${glowColor})`,
+          animation: triggered ? "fireExplode 0.4s ease-out forwards" : "none",
+          cursor: startY !== null ? "grabbing" : "grab",
+        }}
       >
         🔥
       </div>
 
-      <p className="text-xs mt-8 text-orange-500 font-black uppercase tracking-wider select-none animate-pulse">
-        {triggered ? "🚀 БУУДЛАА! (発射!)" : "↑ SWIPE FIRE UP"}
+      {/* ── 操作ガイド（ドラッグ開始で静かに消える） ───────────── */}
+      <p
+        className="absolute bottom-2 text-[10px] font-black text-orange-400 tracking-widest"
+        style={{
+          opacity: dragOffset > 12 ? 0 : 0.75,
+          transition: "opacity 0.15s",
+        }}
+      >
+        ↑ дээш чирнэ үү
       </p>
     </div>
   );
