@@ -257,7 +257,7 @@ export default function ViewPage() {
     <div className="min-h-screen bg-sky-50 p-6 overflow-hidden relative flex flex-col items-center">
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-[10%] left-[5%] text-7xl opacity-10 animate-pulse">☁️</div>
-        <div className="absolute top-[30%] right-[10%] text-6xl opacity-20 animate-bounce duration-[4000ms]">☁️</div>
+        <div className="absolute top-[30%] right-[10%] text-6xl opacity-20">☁️</div>
         <div className="absolute bottom-[40%] left-[15%] text-5xl opacity-10 animate-pulse">☁️</div>
         <div className="absolute bottom-[15%] right-[20%] text-8xl opacity-10">☁️</div>
         <div className="absolute bottom-0 w-full h-32 bg-gradient-to-t from-green-200/50 to-transparent" />
