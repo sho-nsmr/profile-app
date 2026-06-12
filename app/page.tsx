@@ -23,7 +23,7 @@ export default function Home() {
   // ★ 2. 今回飛ぶアイテムの絵文字を保持するステート
   const [flyingItem, setFlyingItem] = useState("🎈");
 
-  const isFormValid = fatherInitial.trim() !== "" && name.trim() !== "" && origin !== "";
+  const isFormValid = fatherInitial.trim() !== "" && name.trim() !== "";
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -293,7 +293,7 @@ export default function Home() {
                 {hobby.trim() && (
                   <div className="p-3 bg-white rounded-xl border border-slate-100 shadow-sm text-sm">
                     <span className="text-slate-400 block text-[9px] font-bold uppercase">Хобби / 趣味</span>
-                    <span className="font-normal text-slate-600">{hobby}</span>
+                    <span className="font-normal text-slate-700">{hobby}</span>
                   </div>
                 )}
 
@@ -312,9 +312,17 @@ export default function Home() {
                 {dream.trim() && (
                   <div className="p-3 bg-white rounded-xl border border-slate-100 shadow-sm text-sm">
                     <span className="text-slate-400 block text-[9px] font-bold uppercase">Мөрөөдөл / 夢</span>
-                    <span className="font-medium text-slate-600 italic">"{dream}"</span>
+                    <span className="font-medium text-slate-700 whitespace-pre-wrap">{dream}</span>
                   </div>
                 )}
+
+                {memo.trim() && (
+                  <div className="p-3 bg-white rounded-xl border border-slate-100 shadow-sm text-sm">
+                    <span className="text-slate-400 block text-[9px] font-bold uppercase">Нэг үг / 一言</span>
+                    <span className="font-medium text-slate-700 whitespace-pre-wrap">{memo}</span>
+                  </div>
+                )}
+
               </div>
             </div>
           )}
