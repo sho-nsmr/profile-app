@@ -229,12 +229,11 @@ export default function Home() {
               </div>
               <div>
                 <label className="block text-pink-600 font-black mb-1 text-[10px] uppercase tracking-wider">Нэг үг (一言)</label>
-                <input
-                  type="text"
+                <textarea
                   value={memo}
                   onChange={(e) => setMemo(e.target.value)}
-                  className="w-full border-b-2 border-pink-100 focus:border-pink-500 focus:bg-pink-50/50 outline-none p-2 transition-all rounded font-bold text-slate-800 bg-white placeholder:text-slate-400 placeholder:font-normal"
-                  placeholder="Өчигдөр идсэн зайрмаг гоё байсан!"
+                  className="w-full border-2 border-pink-100 focus:border-pink-400 outline-none p-3 bg-white text-slate-800 rounded-xl h-20 resize-none text-sm font-medium placeholder:text-slate-400 placeholder:font-normal"                  
+                  placeholder="Жишээ нь: Өчигдөр идсэн зайрмаг гоё байсан!"
                 />
               </div>
 
@@ -269,7 +268,7 @@ export default function Home() {
                   </div>
 
                   <p className="mt-4 text-[11px] text-slate-400 font-bold leading-relaxed">
-                    QR кодыг найздаа уншуулаарай<br/>
+                    QR кодыг найздаа уншуулаарай!<br/>
                     (友達にスキャンしてもらってね)
                   </p>
 
@@ -278,7 +277,7 @@ export default function Home() {
                     target="_blank"
                     className="mt-4 flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-r from-sky-500 to-indigo-500 text-white font-bold rounded-2xl shadow-md hover:brightness-105 active:scale-95 text-xs text-decoration-none animate-pulse"
                   >
-                    <span>📸</span> Скриншот хийх хуудас (スクショ用画面を開く)
+                    <span>📸</span> Скриншот хийх хуудас (スクショ用の画面を開く)
                   </Link>
                 </div>
               )}

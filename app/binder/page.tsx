@@ -405,10 +405,10 @@ export default function BinderPage() {
                   </h2>
                   <p className="text-sm mb-1">🎨 Хобби: <span className="font-bold">{currentLayer.hobby || "Нууц (秘密)"}</span></p>
                   <p className="text-sm mb-1">🍴 Хоол: <span className="font-bold text-pink-600">{displayFood}</span></p>
-                  <p className="text-sm italic text-slate-500 mt-3">
+                  <p className="text-sm mb-1 whitespace-pre-wrap">
                     ✨ {currentLayer.dream || "Нууц (秘密)"}
                   </p>
-                  <p className="text-sm italic text-slate-500 mt-1">
+                  <p className="text-sm mb-1 whitespace-pre-wrap">
                     💬 {currentLayer.memo || "Нууц (秘密)"}
                   </p>
 
