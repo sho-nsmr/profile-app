@@ -15,7 +15,7 @@ const BINDER_KEY = "mazaalai-binder-v2";
 const OLD_BINDER_KEY = "my-binder";
 
 // 人物タブを表示する人数の閾値
-const PERSON_TAB_THRESHOLD = 7;
+const PERSON_TAB_THRESHOLD = 3;
 // 後ろに覗かせるカードの端の最大数
 const MAX_PEEK = 3;
 
