@@ -107,7 +107,8 @@ function ProfileContent() {
       newest.food === profile.food &&
       newest.dream === profile.dream &&
       newest.memo === profile.memo;
-      if (!isSame) {
+    
+    if (!isSame) {
       // 参照渡しのバグを防ぐためシャローコピーして先頭に追加
       binder.strata[personName] = [{ ...profile }, ...binder.strata[personName]];
 
