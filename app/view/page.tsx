@@ -20,6 +20,7 @@ type Profile = {
   hobby?: string;
   food?: string;
   dream?: string;
+  memo?: string;
   savedAt?: string;
 };
 
@@ -104,9 +105,9 @@ function ProfileContent() {
       newest &&
       newest.hobby === profile.hobby &&
       newest.food === profile.food &&
-      newest.dream === profile.dream;
-
-    if (!isSame) {
+      newest.dream === profile.dream &&
+      newest.memo === profile.memo;
+      if (!isSame) {
       // 参照渡しのバグを防ぐためシャローコピーして先頭に追加
       binder.strata[personName] = [{ ...profile }, ...binder.strata[personName]];
 
@@ -211,6 +212,13 @@ function ProfileContent() {
                 <label className="flex items-center gap-2 text-[10px] text-pink-400 font-black uppercase tracking-widest mb-1 ml-1"><span>🚀</span> Ирээдүйн хүсэл</label>
                 <div className="bg-pink-50/50 p-4 rounded-2xl border-2 border-dashed border-pink-200 text-slate-600 italic leading-relaxed">
                   "{profile.dream || "Одоогоор байхгүй..."}"
+                </div>
+              </div>
+
+              <div className="group">
+                <label className="flex items-center gap-2 text-[10px] text-pink-400 font-black uppercase tracking-widest mb-1 ml-1"><span>💬</span> Нэг үг</label>
+                <div className="bg-white p-4 rounded-2xl border-2 border-pink-50 shadow-sm text-slate-700 font-bold tracking-tight">
+                  {profile.memo || "Нууц (秘密)"}
                 </div>
               </div>
 

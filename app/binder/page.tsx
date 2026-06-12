@@ -24,6 +24,7 @@ type Profile = {
   hobby?: string;
   food?: string;
   dream?: string;
+  memo?: string;
   savedAt?: string;
 };
 
@@ -88,6 +89,7 @@ function getDiff(older: Profile, newer: Profile): DiffField[] {
     { key: "hobby", emoji: "🎨", label: "Хобби" },
     { key: "food",  emoji: "🍴", label: "Хоол" },
     { key: "dream", emoji: "✨", label: "Хүсэл" },
+    { key: "memo",  emoji: "💬", label: "Нэг үг" },
   ];
   return fields
     .filter(f => older[f.key] !== newer[f.key])
@@ -406,6 +408,10 @@ export default function BinderPage() {
                   <p className="text-sm italic text-slate-500 mt-3">
                     ✨ {currentLayer.dream || "Нууц (秘密)"}
                   </p>
+                  <p className="text-sm italic text-slate-500 mt-1">
+                    💬 {currentLayer.memo || "Нууц (秘密)"}
+                  </p>
+
 
                   {/* 差分：前のバージョンとの変化をそっと表示 */}
                   {diff.length > 0 && (

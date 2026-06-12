@@ -12,6 +12,7 @@ export default function Home() {
   const [hobby, setHobby] = useState("");
   const [food, setFood] = useState("");
   const [dream, setDream] = useState("");
+  const [memo, setMemo] = useState("");
   const [qrUrl, setQrUrl] = useState("");
   const [compressedParam, setCompressedParam] = useState(""); 
   const [origin, setOrigin] = useState("");
@@ -73,6 +74,7 @@ export default function Home() {
         hobby,
         food,
         dream,
+        memo,
         savedAt: localDateStr,
       };
       
@@ -224,6 +226,16 @@ export default function Home() {
               <div>
                 <label className="block text-pink-600 font-black mb-1 text-[10px] uppercase tracking-wider">Ирээдүйн хүсэл (夢)</label>
                 <textarea value={dream} onChange={(e) => setDream(e.target.value)} className="w-full border-2 border-pink-100 focus:border-pink-400 outline-none p-3 bg-white text-slate-800 rounded-xl h-20 resize-none text-sm font-medium" placeholder="Мөрөөдөл..." />
+              </div>
+              <div>
+                <label className="block text-pink-600 font-black mb-1 text-[10px] uppercase tracking-wider">Нэг үг (一言)</label>
+                <input
+                  type="text"
+                  value={memo}
+                  onChange={(e) => setMemo(e.target.value)}
+                  className="w-full border-b-2 border-pink-100 focus:border-pink-500 focus:bg-pink-50/50 outline-none p-2 transition-all rounded font-bold text-slate-800 bg-white placeholder:text-slate-400 placeholder:font-normal"
+                  placeholder="Өчигдөр идсэн зайрмаг гоё байсан!"
+                />
               </div>
 
               {/* 着火ボタン：確率抽選関数を呼ぶ */}
