@@ -361,19 +361,30 @@ export default function Home() {
 // ファイル末尾の SwipeIgnite 関数を以下で置き換え [written by Claude]
 // ─────────────────────────────────────────────
 
+
 function SwipeIgnite({ emoji, onComplete }: { emoji: string; onComplete: () => void }) {
   const [dragOffset, setDragOffset] = useState(0);
   const [startY, setStartY]         = useState<number | null>(null);
   const [triggered, setTriggered]   = useState(false);
   const [releasing, setReleasing]   = useState(false);
-  const isDone = useRef(false); // stale closure を避けるため ref で管理
+  const [impactKey, setImpactKey]   = useState(0); // 衝撃エフェクトの再生トリガー
+  const isDone = useRef(false);
 
   const MAX_TRAVEL  = 150;
   const progress    = Math.min(dragOffset / MAX_TRAVEL, 1);
   const isNearBalloon = progress > 0.55;
   const isVeryClose   = progress > 0.82;
 
-  // ── マウス操作対応（Vercel プレビュー確認用） ──────────────
+  // ── 着火の瞬間：振動 + 衝撃エフェクト発火 ─────────────────
+  const fireImpact = () => {
+    setImpactKey(k => k + 1);
+    // 対応端末のみ：ドン・ドン・ドーン の3連パルス
+    if (typeof navigator !== "undefined" && navigator.vibrate) {
+      navigator.vibrate([40, 30, 40, 30, 80]);
+    }
+  };
+
+  // ── マウス操作対応 ──────────────────────────────────────────
   useEffect(() => {
     if (startY === null) return;
 
@@ -384,6 +395,7 @@ function SwipeIgnite({ emoji, onComplete }: { emoji: string; onComplete: () => v
       if (moved >= MAX_TRAVEL) {
         isDone.current = true;
         setTriggered(true);
+        fireImpact();
         setTimeout(() => onComplete(), 750);
       }
     };
@@ -413,6 +425,7 @@ function SwipeIgnite({ emoji, onComplete }: { emoji: string; onComplete: () => v
     if (moved >= MAX_TRAVEL) {
       isDone.current = true;
       setTriggered(true);
+      fireImpact();
       setTimeout(() => onComplete(), 750);
     }
   };
@@ -426,25 +439,23 @@ function SwipeIgnite({ emoji, onComplete }: { emoji: string; onComplete: () => v
   };
 
   // ── 炎のビジュアル計算 ──────────────────────────────────────
-  // 指に 1:1 追従。ドラッグ量 = 炎の移動量（ピクセル単位）
   const fireTranslateY = releasing ? 0 : -Math.min(dragOffset, MAX_TRAVEL);
   const fireScale      = releasing ? 1 : 1 + progress * 0.9;
   const glowPx         = Math.round(progress * 32);
   const glowColor      = `rgba(255, ${Math.round(160 - progress * 120)}, 0, 0.75)`;
-
-  // 風船シェイクのスピード：炎が近づくほど加速
-  const shakeSpeed = `${Math.max(0.17, 0.28 - progress * 0.12).toFixed(2)}s`;
+  const shakeSpeed     = `${Math.max(0.17, 0.28 - progress * 0.12).toFixed(2)}s`;
 
   return (
     <div
       className="relative flex flex-col items-center rounded-2xl border-2 border-dashed border-pink-200 select-none touch-none overflow-hidden"
       style={{
         height: 268,
-        // 炎の高さに連動して、コンテナ下部から暖かいグラデーションが立ち上る
         background: `linear-gradient(to top,
           rgba(251,146,60,${(0.04 + progress * 0.22).toFixed(3)}) 0%,
           transparent ${Math.round(35 + progress * 45)}%)`,
         transition: releasing ? "background 0.5s" : "background 0.08s",
+        // 着火の瞬間、コンテナ全体を震わせる
+        animation: triggered ? "screenShake 0.4s ease-out" : "none",
       }}
       onTouchStart={e => {
         if (e.cancelable) e.preventDefault();
@@ -455,27 +466,48 @@ function SwipeIgnite({ emoji, onComplete }: { emoji: string; onComplete: () => v
       onMouseDown={e => { if (!isDone.current) { setReleasing(false); setStartY(e.clientY); } }}
     >
       <style>{`
-        /* 風船：炎が近づくと揺れる */
         @keyframes balloonShake {
           0%,100% { transform: rotate(0deg); }
           25%     { transform: rotate(-7deg) scale(1.07); }
           75%     { transform: rotate( 7deg) scale(1.07); }
         }
-        /* 着火：風船が上に打ち上がる */
         @keyframes launch {
           0%   { transform: scale(1)   translateY(  0px); opacity: 1; }
-          15%  { transform: scale(1.5) translateY(-18px); opacity: 1; }
+          15%  { transform: scale(1.6) translateY(-20px); opacity: 1; }
           100% { transform: scale(0.3) translateY(-230px); opacity: 0; }
         }
-        /* 着火：炎が弾ける */
         @keyframes fireExplode {
           0%   { transform: scale(1)   translateY( 0px); opacity: 1; }
           40%  { transform: scale(2.5) translateY(-22px); opacity: 0.9; }
           100% { transform: scale(0)   translateY(-44px); opacity: 0; }
         }
+        /* 衝撃波：パッと広がって消える輪 */
+        @keyframes shockwave {
+          0%   { transform: scale(0.2); opacity: 0.9; border-width: 6px; }
+          100% { transform: scale(3.2); opacity: 0;   border-width: 0px; }
+        }
+        /* 火花：中心から飛び散る */
+        @keyframes sparkFly {
+          0%   { transform: translate(0,0) scale(1);   opacity: 1; }
+          100% { transform: translate(var(--sx), var(--sy)) scale(0); opacity: 0; }
+        }
+        /* 全体の軽い揺れ */
+        @keyframes screenShake {
+          0%   { transform: translate(0,0); }
+          20%  { transform: translate(-4px, 2px); }
+          40%  { transform: translate(5px, -3px); }
+          60%  { transform: translate(-3px, -2px); }
+          80%  { transform: translate(3px, 2px); }
+          100% { transform: translate(0,0); }
+        }
+        /* 中心からのフラッシュ */
+        @keyframes impactFlash {
+          0%   { opacity: 0.85; transform: scale(0.4); }
+          100% { opacity: 0;    transform: scale(2.2); }
+        }
       `}</style>
 
-      {/* ── 風船（上で待つ。着火されると打ち上がる） ─────────── */}
+      {/* ── 風船 ─────────────────────────────────────────────── */}
       <div
         className="absolute top-8 text-6xl leading-none pointer-events-none"
         style={{
@@ -495,7 +527,62 @@ function SwipeIgnite({ emoji, onComplete }: { emoji: string; onComplete: () => v
         {emoji}
       </div>
 
-      {/* ── 炎（指に直接追従する） ────────────────────────────── */}
+      {/* ── 衝突エフェクト群（着火の瞬間だけ再生） ─────────────── */}
+      {triggered && (
+        <div
+          key={impactKey}
+          className="absolute top-8 pointer-events-none"
+          style={{ width: "1px", height: "1px" }} // 中心点として機能
+        >
+          {/* フラッシュ：中心から白い光が広がる */}
+          <div
+            className="absolute rounded-full"
+            style={{
+              left: "50%", top: "50%",
+              width: 90, height: 90,
+              marginLeft: -45, marginTop: -45,
+              background: "radial-gradient(circle, rgba(255,255,255,0.95) 0%, rgba(255,200,80,0.5) 45%, transparent 75%)",
+              animation: "impactFlash 0.35s ease-out forwards",
+            }}
+          />
+          {/* 衝撃波の輪 */}
+          <div
+            className="absolute rounded-full border-orange-300"
+            style={{
+              left: "50%", top: "50%",
+              width: 70, height: 70,
+              marginLeft: -35, marginTop: -35,
+              borderStyle: "solid",
+              animation: "shockwave 0.5s ease-out forwards",
+            }}
+          />
+          {/* 火花 8方向 */}
+          {Array.from({ length: 8 }).map((_, i) => {
+            const angle = (i / 8) * Math.PI * 2;
+            const dist  = 55 + (i % 2) * 20;
+            const sx = Math.cos(angle) * dist;
+            const sy = Math.sin(angle) * dist;
+            return (
+              <div
+                key={i}
+                className="absolute text-lg"
+                style={{
+                  left: "50%", top: "50%",
+                  // @ts-expect-error: CSS custom properties
+                  "--sx": `${sx}px`,
+                  "--sy": `${sy}px`,
+                  animation: `sparkFly 0.5s ease-out forwards`,
+                  animationDelay: "0.02s",
+                }}
+              >
+                {i % 2 === 0 ? "✨" : "🔥"}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* ── 炎 ───────────────────────────────────────────────── */}
       <div
         className="absolute leading-none pointer-events-none"
         style={{
@@ -503,10 +590,10 @@ function SwipeIgnite({ emoji, onComplete }: { emoji: string; onComplete: () => v
           fontSize: "3.5rem",
           transform: `translateY(${fireTranslateY}px) scale(${fireScale})`,
           transition: releasing
-            ? "transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1)" // バネで戻る
+            ? "transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1)"
             : triggered
             ? "none"
-            : "transform 0.04s linear", // 指に同期
+            : "transform 0.04s linear",
           filter: triggered
             ? "none"
             : `drop-shadow(0 0 ${glowPx}px ${glowColor})`,
@@ -517,7 +604,7 @@ function SwipeIgnite({ emoji, onComplete }: { emoji: string; onComplete: () => v
         🔥
       </div>
 
-      {/* ── 操作ガイド（ドラッグ開始で静かに消える） ───────────── */}
+      {/* ── 操作ガイド ───────────────────────────────────────── */}
       <p
         className="absolute bottom-2 text-[10px] font-black text-orange-400 tracking-widest"
         style={{
