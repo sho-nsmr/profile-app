@@ -180,6 +180,12 @@ export default function BinderPage() {
     setTouchStartY(e.touches[0].clientY);
   };
 
+  // ★ 縦スワイプ中、画面自体のスクロールを止める
+  const handleTouchMoveCard = (e: React.TouchEvent) => {
+    if (touchStartY === null) return;
+    if (e.cancelable) e.preventDefault();
+  };
+
   const handleTouchEnd = (e: React.TouchEvent, layers: Profile[]) => {
     if (touchStartY === null) return;
     const diff = touchStartY - e.changedTouches[0].clientY;
@@ -338,17 +344,18 @@ export default function BinderPage() {
                   />
                 );
               } else {
-                // 束ねたような見え方（下からまっすぐ覗く）
+                // 束ねたような見え方（左下にずらして紙の山を表現）
                 return (
                   <div
                     key={i}
-                    className="absolute left-0 right-0 rounded-3xl border-4 bg-gradient-to-br from-pink-50 to-yellow-50 border-pink-100"
+                    className="absolute rounded-3xl border-4 bg-gradient-to-br from-pink-50 to-yellow-50 border-pink-100"
                     style={{
-                      top: depth * 8,
+                      top: depth * 7,
+                      left: -depth * 6,
+                      right: depth * 6,
                       height: 200,
                       opacity: Math.max(1 - depth * 0.18, 0.35),
                       zIndex: -depth,
-                      transform: `scale(${1 - depth * 0.02})`,
                     }}
                   />
                 );
@@ -364,8 +371,10 @@ export default function BinderPage() {
                   opacity: cardOpacity,
                   transition: "transform 0.2s ease-out, opacity 0.2s ease-out",
                   zIndex: 1,
+                  touchAction: "none",
                 }}
                 onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMoveCard}
                 onTouchEnd={(e) => handleTouchEnd(e, layers)}
               >
                 {/* 穴（ノートらしさ） */}
