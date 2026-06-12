@@ -453,6 +453,16 @@ export default function Home() {
 
               </div>
               )}
+
+              <div className="p-6 pt-0">
+                <button
+                  type="button"
+                  onClick={() => setStep("home")}
+                  className="flex items-center justify-center gap-2 w-full py-3 bg-slate-800 text-white font-bold rounded-2xl shadow-lg active:scale-95 transition-all"
+                >
+                  <span>🏠</span> Нүүр хуудас руу (homeへ戻る)
+                </button>
+              </div>
             </div>
           )}
 
