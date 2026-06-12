@@ -7,7 +7,7 @@ import LZString from "lz-string";
 const FOOD_MAP: Record<string, string> = {
   buuz: "Бууз (ブーズ)",
   khuushuur: "Хуушуур (ホーショール)",
-  tsuivan: "Цуйван (ツォイワン)",
+  tsuivan: "Цуйван (ツイワン)",
   horhog: "Хорхог (ホルホグ)"
 };
 
@@ -17,7 +17,7 @@ const OLD_BINDER_KEY = "my-binder";
 // 人物タブを表示する人数の閾値
 const PERSON_TAB_THRESHOLD = 3;
 // 後ろに覗かせるカードの端の最大数
-const MAX_PEEK = 3;
+const MAX_PEEK = 4;
 
 type Profile = {
   name: string;
@@ -111,6 +111,14 @@ function getPeekStyle(name: string): "corner" | "stack" {
   let sum = 0;
   for (let i = 0; i < name.length; i++) sum += name.charCodeAt(i);
   return sum % 2 === 0 ? "corner" : "stack";
+}
+
+// ★ stack型のための決定的な「乱れ」（同じ人・同じ深さなら毎回同じ角度）
+function getJitter(name: string, depth: number): number {
+  let sum = 0;
+  for (let i = 0; i < name.length; i++) sum += name.charCodeAt(i) * (i + 1);
+  const seed = (sum * 31 + depth * 17) % 13; // 0-12
+  return (seed - 6) * 0.7; // -4.2deg 〜 +4.2deg
 }
 
 
@@ -326,7 +334,7 @@ export default function BinderPage() {
                 return (
                   <div
                     key={i}
-                    className="absolute rounded-3xl border-4 bg-gradient-to-br from-pink-50 to-yellow-50 border-pink-100"
+                    className="absolute rounded-3xl border-4 bg-gradient-to-br from-pink-50 to-yellow-50 border-pink-200"
                     style={{
                       top: depth * 6,
                       left: depth * 6,
@@ -343,7 +351,7 @@ export default function BinderPage() {
                 return (
                   <div
                     key={i}
-                    className="absolute rounded-3xl border-4 bg-gradient-to-br from-pink-50 to-yellow-50 border-pink-100"
+                    className="absolute rounded-3xl border-4 bg-gradient-to-br from-pink-50 to-yellow-50 border-pink-200"
                     style={{
                       top: depth * 7,
                       left: -depth * 6,
@@ -351,6 +359,7 @@ export default function BinderPage() {
                       height: 200,
                       opacity: Math.max(1 - depth * 0.18, 0.35),
                       zIndex: depth,
+                      transform: `rotate(${getJitter(currentPerson, depth)}deg)`,
                     }}
                   />
                 );
@@ -360,7 +369,7 @@ export default function BinderPage() {
             {/* メインカード */}
             {currentLayer && (
               <div
-                className="relative w-full bg-gradient-to-br from-pink-50 to-yellow-50 rounded-3xl p-6 shadow-2xl border-4 border-pink-200"
+                className="relative w-full bg-gradient-to-br from-pink-50 to-yellow-50 rounded-3xl p-6 shadow-2xl border-4 border-pink-400"
                 style={{
                   transform: cardTransform,
                   opacity: cardOpacity,
