@@ -424,7 +424,7 @@ export default function BinderPage() {
                       ))}
                     </p>
                   )}
-                </div>
+                
 
                 {/* 日付 + バージョンドット */}
                 <div className="mt-5 ml-6 flex items-center gap-2">
