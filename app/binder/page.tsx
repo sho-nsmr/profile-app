@@ -7,7 +7,7 @@ import LZString from "lz-string";
 const FOOD_MAP: Record<string, string> = {
   buuz: "Бууз (ブーズ)",
   khuushuur: "Хуушуур (ホーショール)",
-  tsuivan: "Цуйван (ツイワン)",
+  tsuivan: "Цуйван (ツォイワン)",
   horhog: "Хорхог (ホルホグ)"
 };
 
@@ -289,34 +289,29 @@ export default function BinderPage() {
                 <button
                   key={name}
                   onClick={() => handleSelectPersonTab(idx)}
-                  className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all border-2 ${
+                  className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all border-2 flex items-center gap-1.5 ${
                     personIndex === idx
                       ? "bg-orange-400 text-white border-orange-400 shadow-md"
                       : "bg-white text-orange-400 border-orange-200 hover:border-orange-300"
                   }`}
                 >
                   {name}
+                  {binderData.strata[name].length > 1 && (
+                    <span className="flex gap-0.5 items-center">
+                      {binderData.strata[name].map((_, i) => (
+                        <span
+                          key={i}
+                          className={`w-1 h-1 rounded-full ${
+                            personIndex === idx ? "bg-white/80" : "bg-orange-300"
+                          }`}
+                        />
+                      ))}
+                    </span>
+                  )}
                 </button>
               ))}
             </div>
           )}
-
-          {/* 名前 + バージョンドット（インジケーターのみ） */}
-          <div className="flex items-center gap-2 mb-3">
-            <h2 className="text-lg font-black text-orange-500">{currentPerson}</h2>
-            {layers.length > 1 && (
-              <div className="flex gap-1 items-center">
-                {layers.map((_, i) => (
-                  <span
-                    key={i}
-                    className={`w-1.5 h-1.5 rounded-full ${
-                      i === versionIndex ? "bg-pink-400" : "bg-orange-200"
-                    }`}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
 
           {/* ★ カードスタック（後ろに最大3枚の端が覗く） */}
           <div
@@ -339,7 +334,7 @@ export default function BinderPage() {
                       bottom: -(peekCount - depth) * 0 - depth * 4,
                       height: 200,
                       opacity: Math.max(1 - depth * 0.18, 0.35),
-                      zIndex: -depth,
+                      zIndex: depth,
                     }}
                   />
                 );
@@ -355,7 +350,7 @@ export default function BinderPage() {
                       right: depth * 6,
                       height: 200,
                       opacity: Math.max(1 - depth * 0.18, 0.35),
-                      zIndex: -depth,
+                      zIndex: depth,
                     }}
                   />
                 );
@@ -370,7 +365,7 @@ export default function BinderPage() {
                   transform: cardTransform,
                   opacity: cardOpacity,
                   transition: "transform 0.2s ease-out, opacity 0.2s ease-out",
-                  zIndex: 1,
+                  zIndex: MAX_PEEK + 1,
                   touchAction: "none",
                 }}
                 onTouchStart={handleTouchStart}
@@ -416,11 +411,23 @@ export default function BinderPage() {
                   )}
                 </div>
 
-                {/* 日付 */}
-                <div className="mt-5 ml-6">
+                {/* 日付 + バージョンドット */}
+                <div className="mt-5 ml-6 flex items-center gap-2">
                   <span className="text-[10px] text-slate-400">
                     {currentLayer.savedAt || ""}
                   </span>
+                  {layers.length > 1 && (
+                    <div className="flex gap-1 items-center">
+                      {layers.map((_, i) => (
+                        <span
+                          key={i}
+                          className={`w-1.5 h-1.5 rounded-full ${
+                            i === versionIndex ? "bg-pink-400" : "bg-orange-200"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
