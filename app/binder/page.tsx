@@ -399,19 +399,19 @@ export default function BinderPage() {
                 </button>
 
                 {/* プロフィール本文 */}
-                <div className="ml-6">
+                <div className="ml-6 text-slate-950 font-normal">
                   <h2 className="text-2xl font-black text-pink-500 mb-3">
                     {currentLayer.name}
                   </h2>
-                  <p className="text-sm mb-1">🎨 Хобби: <span className="font-bold">{currentLayer.hobby || "Нууц (秘密)"}</span></p>
-                  <p className="text-sm mb-1">🍴 Хоол: <span className="font-bold text-pink-600">{displayFood}</span></p>
+                  <p className="text-sm mb-1">🎨 Хобби: <span className="font-bold text-indigo-950">{currentLayer.hobby || "Нууц (秘密)"}</span></p>
+                  <p className="text-sm mb-1">🍴 Хоол: <span className="font-bold text-indigo-950">{displayFood}</span></p>
                   <p className="text-sm mb-1 whitespace-pre-wrap">
-                    ✨ {currentLayer.dream || "Нууц (秘密)"}
+                    ✨ Мөрөөдөл: <span className="font-bold text-indigo-950">{currentLayer.dream || "Нууц (秘密)"}</span>
                   </p>
                   <p className="text-sm mb-1 whitespace-pre-wrap">
-                    💬 {currentLayer.memo || "Нууц (秘密)"}
+                    💬 Нэг үг: <span className="font-bold text-indigo-950">{currentLayer.memo || "Нууц (秘密)"}</span>
                   </p>
-
+                </div>
 
                   {/* 差分：前のバージョンとの変化をそっと表示 */}
                   {diff.length > 0 && (

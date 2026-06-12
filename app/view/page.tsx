@@ -139,7 +139,7 @@ function ProfileContent() {
     </div>
   );
 
-  const displayFood = FOOD_MAP[profile.food || ''] || profile.food || "Бүгд (全部)";
+  const displayFood = FOOD_MAP[profile.food || ''] || profile.food || "Нууц (秘密)";
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[75vh] relative w-full max-w-sm mx-auto">
@@ -196,34 +196,34 @@ function ProfileContent() {
             <div className="p-8 space-y-5 bg-gradient-to-b from-white to-pink-50/30">
               <div className="group">
                 <label className="flex items-center gap-2 text-[10px] text-pink-400 font-black uppercase tracking-widest mb-1 ml-1"><span>🎨</span> Хобби</label>
-                <div className="bg-white p-4 rounded-2xl border-2 border-pink-50 shadow-sm text-slate-700 font-bold tracking-tight">
+                <div className="bg-white p-4 rounded-2xl border-2 border-pink-50 shadow-sm text-indigo-950 font-bold tracking-tight">
                   {profile.hobby || "Нууц (秘密)"}
                 </div>
               </div>
 
               <div className="group">
                 <label className="flex items-center gap-2 text-[10px] text-pink-400 font-black uppercase tracking-widest mb-1 ml-1"><span>🍴</span> Дуртай хоол</label>
-                <div className="bg-white p-4 rounded-2xl border-2 border-pink-50 shadow-sm text-pink-600 font-bold tracking-tight">
+                <div className="bg-white p-4 rounded-2xl border-2 border-pink-50 shadow-sm text-indigo-950 font-bold tracking-tight">
                   {displayFood}
                 </div>
               </div>
 
               <div className="group">
                 <label className="flex items-center gap-2 text-[10px] text-pink-400 font-black uppercase tracking-widest mb-1 ml-1"><span>🚀</span> Ирээдүйн хүсэл</label>
-                <div className="bg-white p-4 rounded-2xl border-2 border-pink-50 shadow-sm text-slate-700 font-bold tracking-tight whitespace-pre-wrap">
+                <div className="bg-white p-4 rounded-2xl border-2 border-pink-50 shadow-sm text-indigo-950 font-bold tracking-tight whitespace-pre-wrap">
                   {profile.dream || "Нууц (秘密)"}
                 </div>
               </div>
 
               <div className="group">
                 <label className="flex items-center gap-2 text-[10px] text-pink-400 font-black uppercase tracking-widest mb-1 ml-1"><span>💬</span> Нэг үг</label>
-                <div className="bg-white p-4 rounded-2xl border-2 border-pink-50 shadow-sm text-slate-700 font-bold tracking-tight whitespace-pre-wrap">
+                <div className="bg-white p-4 rounded-2xl border-2 border-pink-50 shadow-sm text-indigo-950 font-bold tracking-tight whitespace-pre-wrap">
                   {profile.memo || "Нууц (秘密)"}
                 </div>
               </div>
 
               <div className="mt-4 text-center text-[10px] text-pink-300 italic">
-                Энэ профайлыг {profile.name} bichsen!
+                Энэ профайлыг {profile.name} бичсэн!
               </div>
 
               <div className="space-y-3 pt-4 border-t border-pink-100">
