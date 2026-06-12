@@ -7,12 +7,17 @@ import LZString from "lz-string";
 const FOOD_MAP: Record<string, string> = {
   buuz: "Бууз (ブーズ)",
   khuushuur: "Хуушуур (ホーショール)",
-  tsuivan: "Цуйван (ツォイワン)",
+  tsuivan: "Цуйван (ツイワン)",
   horhog: "Хорхог (ホルホグ)"
 };
 
 const BINDER_KEY = "mazaalai-binder-v2";
 const OLD_BINDER_KEY = "my-binder";
+
+// 人物タブを表示する人数の閾値
+const PERSON_TAB_THRESHOLD = 7;
+// 後ろに覗かせるカードの端の最大数
+const MAX_PEEK = 3;
 
 type Profile = {
   name: string;
@@ -100,13 +105,25 @@ function getDetailUrl(profile: Profile): string {
   return `/view?p=${compressed}&from=binder`;
 }
 
+// ★ 名前から決定的に「覗き方の癖」を割り当てる
+// 同じ名前なら常に同じ結果（人物固有の質感になる）
+function getPeekStyle(name: string): "corner" | "stack" {
+  let sum = 0;
+  for (let i = 0; i < name.length; i++) sum += name.charCodeAt(i);
+  return sum % 2 === 0 ? "corner" : "stack";
+}
+
 
 export default function BinderPage() {
   const [binderData, setBinderData] = useState<BinderData>({ version: 2, strata: {} });
-  const [selectedPerson, setSelectedPerson] = useState<string | null>(null);
+  const [personIndex, setPersonIndex] = useState(0);
   const [versionIndex, setVersionIndex] = useState(0); // 0 = newest
   const [elapsedInfo, setElapsedInfo] = useState<{ primary: string; sub: string } | null>(null);
   const [hasMounted, setHasMounted] = useState(false);
+
+  // スワイプ用
+  const [touchStartY, setTouchStartY] = useState<number | null>(null);
+  const [swipeDir, setSwipeDir] = useState<"up" | "down" | null>(null);
 
   useEffect(() => {
     const data = loadAndMigrateBinder();
@@ -118,38 +135,73 @@ export default function BinderPage() {
     data.lastOpened = new Date().toISOString();
     localStorage.setItem(BINDER_KEY, JSON.stringify(data));
 
-    // 旧データのクリーンアップ
     if (localStorage.getItem(OLD_BINDER_KEY)) {
       localStorage.removeItem(OLD_BINDER_KEY);
     }
 
     setBinderData(data);
-    const people = Object.keys(data.strata);
-    if (people.length > 0) setSelectedPerson(people[0]);
     setHasMounted(true);
   }, []);
 
-  // 人物タブ切り替え時にページをリセット
-  const handleSelectPerson = (name: string) => {
-    setSelectedPerson(name);
+  const people = Object.keys(binderData.strata);
+
+  // ★ ← → : 人物間ナビゲーション。切り替えたら必ず最新(0)に戻す
+  const goToPerson = (newIndex: number) => {
+    if (newIndex < 0 || newIndex >= people.length) return;
+    setPersonIndex(newIndex);
     setVersionIndex(0);
   };
 
-  const handleDelete = (personName: string, idx: number) => {
+  const handleSelectPersonTab = (idx: number) => {
+    setPersonIndex(idx);
+    setVersionIndex(0);
+  };
+
+  const handleDelete = () => {
+    const personName = people[personIndex];
     if (!confirm("このページを削除しますか？")) return;
     const updated = { ...binderData, strata: { ...binderData.strata } };
-    updated.strata[personName] = updated.strata[personName].filter((_, i) => i !== idx);
+    updated.strata[personName] = updated.strata[personName].filter((_, i) => i !== versionIndex);
+
     if (updated.strata[personName].length === 0) {
       delete updated.strata[personName];
-      const remaining = Object.keys(updated.strata);
-      setSelectedPerson(remaining.length > 0 ? remaining[0] : null);
+      const remainingCount = Object.keys(updated.strata).length;
+      setPersonIndex(p => Math.min(p, Math.max(0, remainingCount - 1)));
     }
     setVersionIndex(0);
     setBinderData(updated);
     localStorage.setItem(BINDER_KEY, JSON.stringify(updated));
   };
 
-  // Hydration guard
+  // ★ 縦スワイプ：上＝過去へ、下＝今へ
+  const SWIPE_THRESHOLD = 40;
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStartY(e.touches[0].clientY);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent, layers: Profile[]) => {
+    if (touchStartY === null) return;
+    const diff = touchStartY - e.changedTouches[0].clientY;
+    setTouchStartY(null);
+
+    if (diff > SWIPE_THRESHOLD && versionIndex < layers.length - 1) {
+      // 上スワイプ → 過去へ
+      setSwipeDir("up");
+      setTimeout(() => {
+        setVersionIndex(v => v + 1);
+        setSwipeDir(null);
+      }, 200);
+    } else if (diff < -SWIPE_THRESHOLD && versionIndex > 0) {
+      // 下スワイプ → 今へ
+      setSwipeDir("down");
+      setTimeout(() => {
+        setVersionIndex(v => v - 1);
+        setSwipeDir(null);
+      }, 200);
+    }
+  };
+
   if (!hasMounted) {
     return (
       <div className="min-h-screen bg-orange-50 p-6 flex flex-col items-center">
@@ -163,21 +215,30 @@ export default function BinderPage() {
     );
   }
 
-  const people = Object.keys(binderData.strata);
-  const layers: Profile[] = selectedPerson ? (binderData.strata[selectedPerson] || []) : [];
-
-  // 現在表示しているページ
+  const currentPerson = people[personIndex];
+  const layers: Profile[] = currentPerson ? (binderData.strata[currentPerson] || []) : [];
   const currentLayer = layers[versionIndex] ?? null;
-  // 差分：一つ古いバージョンとの比較
   const olderLayer   = layers[versionIndex + 1] ?? null;
   const diff: DiffField[] = currentLayer && olderLayer ? getDiff(olderLayer, currentLayer) : [];
 
   const canGoOlder = versionIndex < layers.length - 1;
   const canGoNewer = versionIndex > 0;
+  const canGoPrevPerson = personIndex > 0;
+  const canGoNextPerson = personIndex < people.length - 1;
 
   const displayFood = currentLayer
-    ? (FOOD_MAP[currentLayer.food ?? ""] || currentLayer.food || "...")
+    ? (FOOD_MAP[currentLayer.food ?? ""] || currentLayer.food || "Нууц (秘密)")
     : "...";
+
+  const peekStyle = currentPerson ? getPeekStyle(currentPerson) : "corner";
+  const peekCount = Math.min(Math.max(layers.length - 1, 0), MAX_PEEK);
+
+  // スワイプ中のカード変位
+  const cardTransform =
+    swipeDir === "up"   ? "translateY(-14px) scale(0.97)" :
+    swipeDir === "down" ? "translateY(14px) scale(0.97)"  :
+    "translateY(0) scale(1)";
+  const cardOpacity = swipeDir ? 0.4 : 1;
 
   return (
     <div className="min-h-screen bg-orange-50 p-6 flex flex-col items-center">
@@ -215,98 +276,152 @@ export default function BinderPage() {
       ) : (
         <div className="w-full max-w-md flex flex-col items-center">
 
-          {/* 人物タブ */}
-          <div className="flex gap-2 overflow-x-auto pb-2 mb-5 w-full">
-            {people.map((name) => {
-              const count = binderData.strata[name].length;
-              return (
+          {/* ★ 人物タブ：7人以上のときのみ。画面幅を超えたら改行して積み上げ */}
+          {people.length >= PERSON_TAB_THRESHOLD && (
+            <div className="flex flex-wrap gap-2 justify-center mb-5 w-full">
+              {people.map((name, idx) => (
                 <button
                   key={name}
-                  onClick={() => handleSelectPerson(name)}
-                  className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-bold transition-all border-2 ${
-                    selectedPerson === name
-                      ? "bg-orange-400 text-white border-orange-400 shadow-lg"
+                  onClick={() => handleSelectPersonTab(idx)}
+                  className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all border-2 ${
+                    personIndex === idx
+                      ? "bg-orange-400 text-white border-orange-400 shadow-md"
                       : "bg-white text-orange-400 border-orange-200 hover:border-orange-300"
                   }`}
                 >
                   {name}
-                  {/* 複数バージョンがあることを示す点（説明しない） */}
-                  {count > 1 && (
-                    <span className={`ml-1.5 inline-flex gap-0.5 items-center ${
-                      selectedPerson === name ? "opacity-60" : "opacity-40"
-                    }`}>
-                      {Array.from({ length: Math.min(count, 4) }).map((_, i) => (
-                        <span key={i} className="w-1 h-1 rounded-full bg-current inline-block" />
-                      ))}
-                    </span>
-                  )}
                 </button>
-              );
-            })}
-          </div>
-
-          {/* ノートカード */}
-          {currentLayer && (
-            <div className="relative w-full bg-gradient-to-br from-pink-50 to-yellow-50 rounded-3xl p-6 shadow-2xl border-4 border-pink-200 animate-in fade-in duration-300">
-
-              {/* 穴（ノートらしさ） */}
-              <div className="absolute left-2 top-6 flex flex-col gap-3">
-                {[...Array(5)].map((_, i) => (
-                  <div key={i} className="w-2 h-2 bg-orange-200 rounded-full" />
-                ))}
-              </div>
-
-              {/* 削除ボタン */}
-              <button
-                onClick={() => handleDelete(selectedPerson!, versionIndex)}
-                className="absolute top-3 right-3 text-xs bg-red-100 text-red-400 px-2 py-1 rounded-full hover:bg-red-200 transition-colors"
-              >
-                ✕
-              </button>
-
-              {/* プロフィール本文 */}
-              <div className="ml-6">
-                <h2 className="text-2xl font-black text-pink-500 mb-3">
-                  {currentLayer.name}
-                </h2>
-                <p className="text-sm mb-1">🎨 Хобби: <span className="font-bold">{currentLayer.hobby || "..."}</span></p>
-                <p className="text-sm mb-1">🍴 Хоол: <span className="font-bold text-pink-600">{displayFood}</span></p>
-                <p className="text-sm italic text-slate-500 mt-3">
-                  ✨ {currentLayer.dream || "..."}
-                </p>
-
-                {/* 差分：前のバージョンとの変化をそっと表示 */}
-                {diff.length > 0 && (
-                  <p className="mt-4 text-[11px] text-slate-400 italic leading-relaxed">
-                    {diff.map((d, i) => (
-                      <span key={String(d.key)}>
-                        {i > 0 && "・"}
-                        {d.emoji} {d.label}が変わった
-                      </span>
-                    ))}
-                  </p>
-                )}
-              </div>
-
-              {/* 日付 + ページナビゲーション */}
-              <div className="mt-5 ml-6 flex items-center justify-between">
-                <span className="text-[10px] text-slate-400">
-                  {currentLayer.savedAt || ""}
-                </span>
-                {layers.length > 1 && (
-                  <span className="text-[10px] text-orange-300 font-bold">
-                    {versionIndex + 1} / {layers.length}
-                  </span>
-                )}
-              </div>
+              ))}
             </div>
           )}
 
-          {/* ページ操作 */}
+          {/* 名前 + バージョンドット（インジケーターのみ） */}
+          <div className="flex items-center gap-2 mb-3">
+            <h2 className="text-lg font-black text-orange-500">{currentPerson}</h2>
+            {layers.length > 1 && (
+              <div className="flex gap-1 items-center">
+                {layers.map((_, i) => (
+                  <span
+                    key={i}
+                    className={`w-1.5 h-1.5 rounded-full ${
+                      i === versionIndex ? "bg-pink-400" : "bg-orange-200"
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* ★ カードスタック（後ろに最大3枚の端が覗く） */}
+          <div
+            className="relative w-full"
+            style={{ paddingBottom: peekCount > 0 ? `${peekCount * 10 + 8}px` : "0px" }}
+          >
+            {/* 後ろに覗くカードの端 */}
+            {Array.from({ length: peekCount }).map((_, i) => {
+              const depth = peekCount - i; // 一番奥が大きい数字
+              if (peekStyle === "corner") {
+                // 右下に寄せて覗かせる
+                return (
+                  <div
+                    key={i}
+                    className="absolute rounded-3xl border-4 bg-gradient-to-br from-pink-50 to-yellow-50 border-pink-100"
+                    style={{
+                      top: depth * 6,
+                      left: depth * 6,
+                      right: -depth * 6,
+                      bottom: -(peekCount - depth) * 0 - depth * 4,
+                      height: 200,
+                      opacity: Math.max(1 - depth * 0.18, 0.35),
+                      zIndex: -depth,
+                    }}
+                  />
+                );
+              } else {
+                // 束ねたような見え方（下からまっすぐ覗く）
+                return (
+                  <div
+                    key={i}
+                    className="absolute left-0 right-0 rounded-3xl border-4 bg-gradient-to-br from-pink-50 to-yellow-50 border-pink-100"
+                    style={{
+                      top: depth * 8,
+                      height: 200,
+                      opacity: Math.max(1 - depth * 0.18, 0.35),
+                      zIndex: -depth,
+                      transform: `scale(${1 - depth * 0.02})`,
+                    }}
+                  />
+                );
+              }
+            })}
+
+            {/* メインカード */}
+            {currentLayer && (
+              <div
+                className="relative w-full bg-gradient-to-br from-pink-50 to-yellow-50 rounded-3xl p-6 shadow-2xl border-4 border-pink-200"
+                style={{
+                  transform: cardTransform,
+                  opacity: cardOpacity,
+                  transition: "transform 0.2s ease-out, opacity 0.2s ease-out",
+                  zIndex: 1,
+                }}
+                onTouchStart={handleTouchStart}
+                onTouchEnd={(e) => handleTouchEnd(e, layers)}
+              >
+                {/* 穴（ノートらしさ） */}
+                <div className="absolute left-2 top-6 flex flex-col gap-3">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="w-2 h-2 bg-orange-200 rounded-full" />
+                  ))}
+                </div>
+
+                {/* 削除ボタン */}
+                <button
+                  onClick={handleDelete}
+                  className="absolute top-3 right-3 text-xs bg-red-100 text-red-400 px-2 py-1 rounded-full hover:bg-red-200 transition-colors"
+                >
+                  ✕
+                </button>
+
+                {/* プロフィール本文 */}
+                <div className="ml-6">
+                  <h2 className="text-2xl font-black text-pink-500 mb-3">
+                    {currentLayer.name}
+                  </h2>
+                  <p className="text-sm mb-1">🎨 Хобби: <span className="font-bold">{currentLayer.hobby || "Нууц (秘密)"}</span></p>
+                  <p className="text-sm mb-1">🍴 Хоол: <span className="font-bold text-pink-600">{displayFood}</span></p>
+                  <p className="text-sm italic text-slate-500 mt-3">
+                    ✨ {currentLayer.dream || "Нууц (秘密)"}
+                  </p>
+
+                  {/* 差分：前のバージョンとの変化をそっと表示 */}
+                  {diff.length > 0 && (
+                    <p className="mt-4 text-[11px] text-slate-400 italic leading-relaxed">
+                      {diff.map((d, i) => (
+                        <span key={String(d.key)}>
+                          {i > 0 && "・"}
+                          {d.emoji} {d.label}が変わった
+                        </span>
+                      ))}
+                    </p>
+                  )}
+                </div>
+
+                {/* 日付 */}
+                <div className="mt-5 ml-6">
+                  <span className="text-[10px] text-slate-400">
+                    {currentLayer.savedAt || ""}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ← → : 人物間ナビゲーション */}
           <div className="flex items-center gap-6 mt-6">
             <button
-              onClick={() => setVersionIndex(v => v + 1)}
-              disabled={!canGoOlder}
+              onClick={() => goToPerson(personIndex - 1)}
+              disabled={!canGoPrevPerson}
               className="px-4 py-2 bg-white rounded-full shadow disabled:opacity-30 transition-opacity"
             >
               ←
@@ -320,28 +435,18 @@ export default function BinderPage() {
             </Link>
 
             <button
-              onClick={() => setVersionIndex(v => v - 1)}
-              disabled={!canGoNewer}
+              onClick={() => goToPerson(personIndex + 1)}
+              disabled={!canGoNextPerson}
               className="px-4 py-2 bg-white rounded-full shadow disabled:opacity-30 transition-opacity"
             >
               →
             </button>
           </div>
 
-          {/* 複数バージョンある場合のみドット表示 */}
-          {layers.length > 1 && (
-            <div className="flex gap-1.5 mt-3">
-              {layers.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setVersionIndex(i)}
-                  className={`w-2 h-2 rounded-full transition-all ${
-                    i === versionIndex ? "bg-pink-400 scale-125" : "bg-orange-200"
-                  }`}
-                />
-              ))}
-            </div>
-          )}
+          {/* 全体ページ位置（人数が多いとき用） */}
+          <p className="text-[10px] text-orange-300 font-bold mt-2">
+            {personIndex + 1} / {people.length}
+          </p>
 
         </div>
       )}
